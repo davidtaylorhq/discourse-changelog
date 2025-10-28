@@ -1,9 +1,10 @@
 import { pageTitle } from 'ember-page-title';
-
+import CommitViewer from '../components/commit-viewer';
 
 <template>
-  {{pageTitle "DiscourseChangelog"}}
-  <h2 id="title">Welcome to Ember</h2>
+  {{pageTitle "Discourse Commit Viewer"}}
+
+  <CommitViewer />
 
   {{outlet}}
 </template>
