@@ -9,14 +9,14 @@ import CommitCard from './commit-card';
 import VerticalCollection from '@html-next/vertical-collection/components/vertical-collection/component';
 
 const COMMIT_TYPES = [
-  { key: 'FEATURE', label: 'Feature', color: '#2ecc71' },
-  { key: 'FIX', label: 'Fix', color: '#e74c3c' },
-  { key: 'PERF', label: 'Performance', color: '#9b59b6' },
-  { key: 'UX', label: 'UX', color: '#3498db' },
-  { key: 'A11Y', label: 'Accessibility', color: '#1abc9c' },
-  { key: 'SECURITY', label: 'Security', color: '#e67e22' },
-  { key: 'DEV', label: 'Dev', color: '#95a5a6' },
-  { key: 'OTHER', label: 'Other', color: '#7f8c8d' },
+  { key: 'FEATURE', label: 'Feature', color: '#27ae60' },
+  { key: 'FIX', label: 'Fix', color: '#c0392b' },
+  { key: 'PERF', label: 'Performance', color: '#8e44ad' },
+  { key: 'UX', label: 'UX', color: '#2980b9' },
+  { key: 'A11Y', label: 'Accessibility', color: '#16a085' },
+  { key: 'SECURITY', label: 'Security', color: '#d35400' },
+  { key: 'DEV', label: 'Dev', color: '#7f8c8d' },
+  { key: 'OTHER', label: 'Other', color: '#95a5a6' },
 ];
 
 export default class CommitViewer extends Component {
@@ -209,7 +209,6 @@ export default class CommitViewer extends Component {
       </div>
 
       <div class="filter-section">
-        <label>Filter by type:</label>
         <div class="filter-pills">
           {{#each this.commitTypes as |type|}}
             <button

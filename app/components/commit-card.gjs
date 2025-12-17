@@ -11,13 +11,13 @@ function escapeHtml(text) {
 }
 
 const COMMIT_TYPE_CONFIG = {
-  FEATURE: { label: 'Feature', color: '#2ecc71' },
-  FIX: { label: 'Fix', color: '#e74c3c' },
-  PERF: { label: 'Performance', color: '#9b59b6' },
-  UX: { label: 'UX', color: '#3498db' },
-  A11Y: { label: 'Accessibility', color: '#1abc9c' },
-  SECURITY: { label: 'Security', color: '#e67e22' },
-  DEV: { label: 'Dev', color: '#95a5a6' },
+  FEATURE: { label: 'Feature', color: '#27ae60' },
+  FIX: { label: 'Fix', color: '#c0392b' },
+  PERF: { label: 'Performance', color: '#8e44ad' },
+  UX: { label: 'UX', color: '#2980b9' },
+  A11Y: { label: 'Accessibility', color: '#16a085' },
+  SECURITY: { label: 'Security', color: '#d35400' },
+  DEV: { label: 'Dev', color: '#7f8c8d' },
 };
 
 export default class CommitCard extends Component {
@@ -70,35 +70,25 @@ export default class CommitCard extends Component {
   <template>
     <div class="commit-card" {{on "click" this.openCommit}}>
       <div class="commit-header">
-        <div class="commit-author">
-          <div class="author-info">
-            <div class="author-name">
-              {{@commit.author}}
-            </div>
-            <div class="commit-date">
-              {{this.formattedDate}}
-              at
-              {{this.formattedTime}}
-            </div>
-          </div>
+        <div class="commit-message">
+          {{this.subjectWithLinks}}
         </div>
-        <div class="commit-sha">
-          {{this.shortHash}}
+        <div class="commit-tags">
+          {{#if this.commitTypeConfig}}
+            <span
+              class="commit-badge"
+              style="background-color: {{this.commitTypeConfig.color}}"
+            >{{this.commitTypeConfig.label}}</span>
+          {{/if}}
+          <span class="commit-sha">
+            {{this.shortHash}}
+          </span>
         </div>
       </div>
 
-      <div class="commit-message">
-        {{#if this.commitTypeConfig}}
-          <span
-            class="commit-badge"
-            style="background-color: {{this.commitTypeConfig.color}}"
-          >{{this.commitTypeConfig.label}}</span>
-        {{/if}}
-        {{this.subjectWithLinks}}
-      </div>
-
-      <div class="commit-footer">
-        <span class="click-hint">Click to view on GitHub</span>
+      <div class="commit-meta">
+        <span class="commit-author">{{@commit.author}}</span>
+        <span class="commit-date">{{this.formattedDate}} · {{this.formattedTime}}</span>
       </div>
     </div>
   </template>

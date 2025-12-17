@@ -1,10 +1,10 @@
 .commit-card {
   background: white;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s ease;
   border-left: 4px solid #3498db;
 }
 
@@ -17,80 +17,94 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.commit-author {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.author-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid #e1e8ed;
-}
-
-.author-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.author-name {
-  font-weight: 600;
-  color: #2c3e50;
-  font-size: 0.95rem;
-}
-
-.commit-date {
-  color: #7f8c8d;
-  font-size: 0.85rem;
-}
-
-.commit-sha {
-  background: #ecf0f1;
-  color: #2c3e50;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-family: Monaco, Menlo, "Ubuntu Mono", monospace;
-  font-size: 0.9rem;
-  font-weight: 600;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
 }
 
 .commit-message {
   color: #2c3e50;
   font-size: 1rem;
   line-height: 1.5;
-  margin-bottom: 1rem;
-  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
 }
 
-.commit-footer {
+.commit-message .pr-link {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.commit-message .pr-link:hover {
+  text-decoration: underline;
+}
+
+.commit-meta {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: #95a5a6;
 }
 
-.click-hint {
+.commit-author {
   color: #7f8c8d;
-  font-size: 0.85rem;
-  font-style: italic;
+}
+
+.commit-date {
+  color: #95a5a6;
+}
+
+.commit-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.commit-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.commit-sha {
+  background: #f8f9fa;
+  color: #5a6c7d;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-family: "SF Mono", Monaco, Menlo, "Ubuntu Mono", monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid #e1e8ed;
 }
 
 /* Responsive design */
 @media (width <= 768px) {
   .commit-card {
-    padding: 1rem;
+    padding: 0.875rem 1rem;
   }
-  
+
   .commit-header {
     flex-direction: column;
-    gap: 0.75rem;
     align-items: flex-start;
+    gap: 0.5rem;
   }
-  
-  .commit-author {
-    width: 100%;
+
+  .commit-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .commit-tags {
+    align-self: flex-start;
   }
 }
