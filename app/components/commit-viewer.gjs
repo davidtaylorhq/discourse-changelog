@@ -10,6 +10,7 @@ import semver from 'semver';
 import CommitCard from './commit-card';
 import FeatureCard from './feature-card';
 import VerticalCollection from '@html-next/vertical-collection/components/vertical-collection/component';
+import { getCommitsBetween, getCommitType } from '../lib/git-utils.js';
 
 const COMMIT_TYPES = [
   { key: 'FEATURE', label: 'Feature', color: '#27ae60' },
@@ -53,92 +54,6 @@ export default class CommitViewer extends Component {
     } finally {
       this.isLoading = false;
     }
-  }
-
-  // Resolve a ref (tag/branch/hash) to a commit hash
-  resolveRef(ref) {
-    if (!this.commitData) return ref;
-
-    // Check if it's a tag
-    if (this.commitData.refs.tags[ref]) {
-      return this.commitData.refs.tags[ref];
-    }
-
-    // Check if it's a branch
-    if (this.commitData.refs.branches[ref]) {
-      return this.commitData.refs.branches[ref];
-    }
-
-    // Check if it's a partial hash
-    if (ref.length < 40) {
-      const fullHash = Object.keys(this.commitData.commits).find((h) =>
-        h.startsWith(ref)
-      );
-      return fullHash || ref;
-    }
-
-    // Otherwise assume it's a full hash
-    return ref;
-  }
-
-  // Iterative traversal to find all commits reachable from a given commit
-  traverseParents(commitHash) {
-    if (!this.commitData) return new Set();
-
-    const visited = new Set();
-    const queue = [commitHash];
-
-    while (queue.length > 0) {
-      const currentHash = queue.shift();
-
-      // Skip if already visited or not in our dataset
-      if (
-        !currentHash ||
-        visited.has(currentHash) ||
-        !this.commitData.commits[currentHash]
-      ) {
-        continue;
-      }
-
-      visited.add(currentHash);
-      const commit = this.commitData.commits[currentHash];
-
-      // Add parents to queue
-      if (commit.parents) {
-        commit.parents.forEach((parentHash) => {
-          if (!visited.has(parentHash)) {
-            queue.push(parentHash);
-          }
-        });
-      }
-    }
-
-    return visited;
-  }
-
-  // Get commits between two refs
-  getCommitsBetween(startRef, endRef) {
-    if (!this.commitData) return [];
-
-    // Resolve refs to commit hashes
-    const startHash = this.resolveRef(startRef);
-    const endHash = this.resolveRef(endRef);
-
-    // Build set of all commits reachable from startRef (exclusive set)
-    const reachableFromStart = this.traverseParents(startHash);
-
-    // Build set of all commits reachable from endRef (inclusive set)
-    const reachableFromEnd = this.traverseParents(endHash);
-
-    // Difference: commits in endRef but not in startRef
-    const betweenSet = new Set(
-      [...reachableFromEnd].filter((hash) => !reachableFromStart.has(hash))
-    );
-
-    // Convert to commit objects
-    return [...betweenSet]
-      .map((hash) => this.commitData.commits[hash])
-      .filter((c) => c);
   }
 
   loadQueryParams() {
@@ -199,12 +114,12 @@ export default class CommitViewer extends Component {
     const endRef = this.endHash.trim() || 'main';
 
     // Get commits between the two refs using graph traversal
-    let filtered = this.getCommitsBetween(startRef, endRef);
+    let filtered = getCommitsBetween(this.commitData, startRef, endRef);
 
     // Filter by commit type
     if (this.hiddenTypes.size > 0) {
       filtered = filtered.filter((commit) => {
-        const type = this.getCommitType(commit.subject) || 'OTHER';
+        const type = getCommitType(commit.subject) || 'OTHER';
         return !this.hiddenTypes.has(type);
       });
     }
@@ -287,10 +202,6 @@ export default class CommitViewer extends Component {
     });
   }
 
-  getCommitType(subject) {
-    const match = subject.match(/^(FEATURE|FIX|PERF|UX|A11Y|SECURITY|DEV):/);
-    return match ? match[1] : null;
-  }
 
   @action
   isTypeHidden(typeKey) {
@@ -336,7 +247,7 @@ export default class CommitViewer extends Component {
     });
 
     this.commits.forEach((commit) => {
-      const type = this.getCommitType(commit.subject);
+      const type = getCommitType(commit.subject);
       if (type && counts[type] !== undefined) {
         counts[type]++;
       } else if (!type) {
