@@ -57,7 +57,13 @@ export default class CommitViewer extends Component {
     if (this.startHash) {
       return this.startHash === value;
     }
-    return value === DEFAULT_START_REF;
+    // When start is not specified, compute the previous version from end
+    if (!this.data.commitData) {
+      return false;
+    }
+    const endRef = this.endHash.trim() || DEFAULT_END_REF;
+    const computedStart = this.data.getPreviousVersion(endRef) || DEFAULT_START_REF;
+    return value === computedStart;
   };
 
   isEndSelected = (value) => {
@@ -109,8 +115,13 @@ export default class CommitViewer extends Component {
   get commits() {
     if (!this.data.commitData) return [];
 
-    const startRef = this.startHash.trim() || DEFAULT_START_REF;
     const endRef = this.endHash.trim() || DEFAULT_END_REF;
+
+    // If start is not specified, find the previous version from end
+    let startRef = this.startHash.trim();
+    if (!startRef) {
+      startRef = this.data.getPreviousVersion(endRef) || DEFAULT_START_REF;
+    }
 
     // Get commits between the two refs using graph traversal
     let filtered = this.data.getCommitsBetween(startRef, endRef);
@@ -131,12 +142,12 @@ export default class CommitViewer extends Component {
     if (!this.data.commitData) return null;
 
     // If user has specified custom refs and we got no commits, show error
-    if (
-      this.commits.length === 0 &&
-      (this.startHash.trim() || this.endHash.trim())
-    ) {
-      const startRef = this.startHash.trim() || DEFAULT_START_REF;
+    if (this.commits.length === 0) {
       const endRef = this.endHash.trim() || DEFAULT_END_REF;
+      let startRef = this.startHash.trim();
+      if (!startRef) {
+        startRef = this.data.getPreviousVersion(endRef) || DEFAULT_START_REF;
+      }
       return `No commits found between "${startRef}" and "${endRef}"`;
     }
 
@@ -258,7 +269,6 @@ export default class CommitViewer extends Component {
     <div class="commit-viewer">
       <div class="header">
         <h1>Discourse Changelog</h1>
-        <p>View commits since v3.4.0 (total: {{this.data.totalCommits}} commits)</p>
       </div>
 
       <div class="form-section">
@@ -289,11 +299,20 @@ export default class CommitViewer extends Component {
               id="start-ref"
               {{on "change" this.updateStartRef}}
             >
-              {{#each this.data.sortedRefs as |ref|}}
-                <option value={{ref.value}} selected={{this.isStartSelected ref.value}}>
-                  {{ref.label}}
-                </option>
-              {{/each}}
+              <optgroup label="Branches">
+                {{#each this.data.branches as |ref|}}
+                  <option value={{ref.value}} selected={{this.isStartSelected ref.value}}>
+                    {{ref.label}}
+                  </option>
+                {{/each}}
+              </optgroup>
+              <optgroup label="Tags">
+                {{#each this.data.sortedTags as |ref|}}
+                  <option value={{ref.value}} selected={{this.isStartSelected ref.value}}>
+                    {{ref.label}}
+                  </option>
+                {{/each}}
+              </optgroup>
             </select>
             <small class="input-help">Select a tag or branch to start from</small>
           {{/if}}
@@ -326,11 +345,20 @@ export default class CommitViewer extends Component {
               id="end-ref"
               {{on "change" this.updateEndRef}}
             >
-              {{#each this.data.sortedRefs as |ref|}}
-                <option value={{ref.value}} selected={{this.isEndSelected ref.value}}>
-                  {{ref.label}}
-                </option>
-              {{/each}}
+              <optgroup label="Branches">
+                {{#each this.data.branches as |ref|}}
+                  <option value={{ref.value}} selected={{this.isEndSelected ref.value}}>
+                    {{ref.label}}
+                  </option>
+                {{/each}}
+              </optgroup>
+              <optgroup label="Tags">
+                {{#each this.data.sortedTags as |ref|}}
+                  <option value={{ref.value}} selected={{this.isEndSelected ref.value}}>
+                    {{ref.label}}
+                  </option>
+                {{/each}}
+              </optgroup>
             </select>
             <small class="input-help">Select a tag or branch to end at</small>
           {{/if}}

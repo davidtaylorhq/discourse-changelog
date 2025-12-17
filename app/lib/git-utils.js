@@ -28,18 +28,24 @@ export class ChangelogData {
     return this.commitData ? Object.keys(this.commitData.commits).length : 0;
   }
 
-  get sortedRefs() {
+  get branches() {
+    if (!this.commitData) return [];
+    return Object.keys(this.commitData.refs.branches).map((branch) => ({
+      value: branch,
+      label: branch,
+    }));
+  }
+
+  get sortedTags() {
     if (!this.commitData) return [];
 
-    const refs = [];
+    // Filter out pre-release tags ending with -latest
+    const filteredTags = Object.keys(this.commitData.refs.tags).filter(
+      (tag) => !tag.endsWith('-latest')
+    );
 
-    // Add branches first
-    Object.keys(this.commitData.refs.branches).forEach((branch) => {
-      refs.push({ value: branch, label: branch, type: 'branch' });
-    });
-
-    // Add tags sorted in descending order
-    const tags = Object.keys(this.commitData.refs.tags).sort((a, b) => {
+    // Sort tags in descending order
+    const tags = filteredTags.sort((a, b) => {
       // Convert beta notation to proper semver prerelease format
       // v3.5.0.beta1 -> v3.5.0-beta.1
       const normalizeTag = (tag) => {
@@ -60,11 +66,65 @@ export class ChangelogData {
       return b.localeCompare(a);
     });
 
-    tags.forEach((tag) => {
-      refs.push({ value: tag, label: tag, type: 'tag' });
+    return tags.map((tag) => ({ value: tag, label: tag }));
+  }
+
+  get sortedRefs() {
+    if (!this.commitData) return [];
+
+    const refs = [];
+
+    // Add branches first
+    this.branches.forEach((branch) => {
+      refs.push({ ...branch, type: 'branch' });
+    });
+
+    // Add tags
+    this.sortedTags.forEach((tag) => {
+      refs.push({ ...tag, type: 'tag' });
     });
 
     return refs;
+  }
+
+  // Get the previous version tag from a given ref
+  // Traverses git history to find the most recent tag in the parent commits
+  getPreviousVersion(ref) {
+    if (!this.commitData) return null;
+
+    // Resolve the ref to a commit hash
+    const commitHash = this.resolveRef(ref);
+    if (!this.commitData.commits[commitHash]) {
+      return null;
+    }
+
+    // Get all parent commits (excluding the ref itself)
+    const parentCommits = this.traverseParents(commitHash);
+    parentCommits.delete(commitHash);
+
+    if (parentCommits.size === 0) {
+      return null;
+    }
+
+    // Only consider tags from sortedTags (which excludes filtered tags like -latest)
+    const validTagValues = this.sortedTags.map((t) => t.value);
+
+    // Find all valid tags that point to parent commits
+    const matchingTags = [];
+    for (const tagName of validTagValues) {
+      const tagHash = this.commitData.refs.tags[tagName];
+      if (tagHash && parentCommits.has(tagHash)) {
+        matchingTags.push(tagName);
+      }
+    }
+
+    if (matchingTags.length === 0) {
+      return null;
+    }
+
+    // sortedTags is already sorted, so just return the first match
+    // (since we iterate validTagValues in sorted order, matchingTags is also sorted)
+    return matchingTags[0];
   }
 
   // Resolve a ref (tag/branch/hash) to a commit hash
