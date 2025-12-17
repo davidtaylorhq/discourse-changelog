@@ -28,7 +28,7 @@ export default class CommitViewer extends Component {
   @tracked error = null;
   @tracked startHash = '';
   @tracked endHash = '';
-  @tracked allCommits = [];
+  @tracked commitData = null; // {commits: {}, refs: {}, baseTag: ''}
   @tracked hiddenTypes = new Set();
   @tracked newFeatures = [];
   @tracked matchingFeatures = [];
@@ -45,7 +45,7 @@ export default class CommitViewer extends Component {
         import('/data/commits.json'),
         import('/data/new-features.json'),
       ]);
-      this.allCommits = commitsModule.default;
+      this.commitData = commitsModule.default;
       this.newFeatures = featuresModule.default;
       this.loadQueryParams();
     } catch (error) {
@@ -53,6 +53,86 @@ export default class CommitViewer extends Component {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  // Resolve a ref (tag/branch/hash) to a commit hash
+  resolveRef(ref) {
+    if (!this.commitData) return ref;
+
+    // Check if it's a tag
+    if (this.commitData.refs.tags[ref]) {
+      return this.commitData.refs.tags[ref];
+    }
+
+    // Check if it's a branch
+    if (this.commitData.refs.branches[ref]) {
+      return this.commitData.refs.branches[ref];
+    }
+
+    // Check if it's a partial hash
+    if (ref.length < 40) {
+      const fullHash = Object.keys(this.commitData.commits).find((h) =>
+        h.startsWith(ref)
+      );
+      return fullHash || ref;
+    }
+
+    // Otherwise assume it's a full hash
+    return ref;
+  }
+
+  // Iterative traversal to find all commits reachable from a given commit
+  traverseParents(commitHash) {
+    if (!this.commitData) return new Set();
+
+    const visited = new Set();
+    const queue = [commitHash];
+
+    while (queue.length > 0) {
+      const currentHash = queue.shift();
+
+      // Skip if already visited or not in our dataset
+      if (!currentHash || visited.has(currentHash) || !this.commitData.commits[currentHash]) {
+        continue;
+      }
+
+      visited.add(currentHash);
+      const commit = this.commitData.commits[currentHash];
+
+      // Add parents to queue
+      if (commit.parents) {
+        commit.parents.forEach((parentHash) => {
+          if (!visited.has(parentHash)) {
+            queue.push(parentHash);
+          }
+        });
+      }
+    }
+
+    return visited;
+  }
+
+  // Get commits between two refs
+  getCommitsBetween(startRef, endRef) {
+    if (!this.commitData) return [];
+
+    // Resolve refs to commit hashes
+    const startHash = this.resolveRef(startRef);
+    const endHash = this.resolveRef(endRef);
+
+    // Build set of all commits reachable from startRef (exclusive set)
+    const reachableFromStart = this.traverseParents(startHash);
+
+    // Build set of all commits reachable from endRef (inclusive set)
+    const reachableFromEnd = this.traverseParents(endHash);
+
+    // Difference: commits in endRef but not in startRef
+    const betweenSet = new Set(
+      [...reachableFromEnd].filter((hash) => !reachableFromStart.has(hash))
+    );
+
+    // Convert to commit objects
+    return [...betweenSet].map((hash) => this.commitData.commits[hash]).filter((c) => c);
   }
 
   loadQueryParams() {
@@ -77,38 +157,18 @@ export default class CommitViewer extends Component {
   }
 
   updateCommitRange() {
-    if (!this.allCommits.length) return;
+    if (!this.commitData) return;
 
-    let filtered = this.allCommits;
+    const startRef = this.startHash.trim() || this.commitData.baseTag;
+    const endRef = this.endHash.trim() || 'main';
 
-    // Find start commit
-    if (this.startHash.trim()) {
-      const startCommit = this.allCommits.find((c) =>
-        c.hash.startsWith(this.startHash.trim())
-      );
-      if (startCommit) {
-        filtered = filtered.filter(
-          (c) => c.commitIndex >= startCommit.commitIndex
-        );
-      } else {
-        this.error = `Start commit not found: ${this.startHash}`;
-        this.commits = [];
-        return;
-      }
-    }
+    // Get commits between the two refs using graph traversal
+    let filtered = this.getCommitsBetween(startRef, endRef);
 
-    // Find end commit
-    if (this.endHash.trim()) {
-      const endCommit = this.allCommits.find((c) =>
-        c.hash.startsWith(this.endHash.trim())
-      );
-      if (endCommit) {
-        filtered = filtered.filter((c) => c.commitIndex <= endCommit.commitIndex);
-      } else {
-        this.error = `End commit not found: ${this.endHash}`;
-        this.commits = [];
-        return;
-      }
+    if (filtered.length === 0 && (this.startHash.trim() || this.endHash.trim())) {
+      this.error = `No commits found between "${startRef}" and "${endRef}"`;
+      this.commits = [];
+      return;
     }
 
     // Filter by commit type
@@ -214,7 +274,7 @@ export default class CommitViewer extends Component {
   }
 
   get totalCommits() {
-    return this.allCommits.length;
+    return this.commitData ? Object.keys(this.commitData.commits).length : 0;
   }
 
   get commitTypes() {
@@ -227,7 +287,9 @@ export default class CommitViewer extends Component {
       counts[type.key] = 0;
     });
 
-    this.allCommits.forEach(commit => {
+    if (!this.commitData) return counts;
+
+    Object.values(this.commitData.commits).forEach(commit => {
       const type = this.getCommitType(commit.subject);
       if (type && counts[type] !== undefined) {
         counts[type]++;
