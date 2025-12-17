@@ -23,6 +23,9 @@ const COMMIT_TYPES = [
   { key: 'OTHER', label: 'Other', color: '#95a5a6' },
 ];
 
+const DEFAULT_START_REF = 'v2025.11.0';
+const DEFAULT_END_REF = 'latest';
+
 export default class CommitViewer extends Component {
   @tracked data = new ChangelogData();
   @tracked hiddenTypes = new Set();
@@ -50,19 +53,18 @@ export default class CommitViewer extends Component {
     return this.args.end || '';
   }
 
-  isStartDefault = () => {
-    return !this.startHash;
-  };
-
   isStartSelected = (value) => {
-    return this.startHash === value;
+    if (this.startHash) {
+      return this.startHash === value;
+    }
+    return value === DEFAULT_START_REF;
   };
 
   isEndSelected = (value) => {
     if (this.endHash) {
       return this.endHash === value;
     }
-    return value === 'main';
+    return value === DEFAULT_END_REF;
   };
 
   @action
@@ -79,8 +81,8 @@ export default class CommitViewer extends Component {
   toggleStartAdvancedMode() {
     this.startAdvancedMode = !this.startAdvancedMode;
     if (!this.startAdvancedMode) {
-      // Reset to first option when leaving advanced mode
-      this.args.onUpdateStart?.(this.data.baseTag);
+      // Reset to default when leaving advanced mode
+      this.args.onUpdateStart?.(DEFAULT_START_REF);
     }
   }
 
@@ -88,8 +90,8 @@ export default class CommitViewer extends Component {
   toggleEndAdvancedMode() {
     this.endAdvancedMode = !this.endAdvancedMode;
     if (!this.endAdvancedMode) {
-      // Reset to first option when leaving advanced mode
-      this.args.onUpdateEnd?.('');
+      // Reset to default when leaving advanced mode
+      this.args.onUpdateEnd?.(DEFAULT_END_REF);
     }
   }
 
@@ -107,8 +109,8 @@ export default class CommitViewer extends Component {
   get commits() {
     if (!this.data.commitData) return [];
 
-    const startRef = this.startHash.trim() || this.data.baseTag;
-    const endRef = this.endHash.trim() || 'main';
+    const startRef = this.startHash.trim() || DEFAULT_START_REF;
+    const endRef = this.endHash.trim() || DEFAULT_END_REF;
 
     // Get commits between the two refs using graph traversal
     let filtered = this.data.getCommitsBetween(startRef, endRef);
@@ -133,8 +135,8 @@ export default class CommitViewer extends Component {
       this.commits.length === 0 &&
       (this.startHash.trim() || this.endHash.trim())
     ) {
-      const startRef = this.startHash.trim() || this.data.baseTag;
-      const endRef = this.endHash.trim() || 'main';
+      const startRef = this.startHash.trim() || DEFAULT_START_REF;
+      const endRef = this.endHash.trim() || DEFAULT_END_REF;
       return `No commits found between "${startRef}" and "${endRef}"`;
     }
 
@@ -225,6 +227,14 @@ export default class CommitViewer extends Component {
     return COMMIT_TYPES;
   }
 
+  get defaultStartRef() {
+    return DEFAULT_START_REF;
+  }
+
+  get defaultEndRef() {
+    return DEFAULT_END_REF;
+  }
+
   @cached
   get commitTypeCounts() {
     const counts = {};
@@ -279,10 +289,6 @@ export default class CommitViewer extends Component {
               id="start-ref"
               {{on "change" this.updateStartRef}}
             >
-              <option value={{this.data.baseTag}} selected={{this.isStartDefault}}>
-                {{this.data.baseTag}}
-                (base)
-              </option>
               {{#each this.data.sortedRefs as |ref|}}
                 <option value={{ref.value}} selected={{this.isStartSelected ref.value}}>
                   {{ref.label}}
