@@ -4,6 +4,7 @@ import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { on } from '@ember/modifier';
 import CommitCard from './commit-card';
+import VerticalCollection from '@html-next/vertical-collection/components/vertical-collection/component';
 
 export default class CommitViewer extends Component {
   @service router;
@@ -157,11 +158,18 @@ export default class CommitViewer extends Component {
           <h2>{{this.formattedCommitCount}} found</h2>
         </div>
 
-        <div class="commits-list">
-          {{#each this.commits as |commit|}}
-            <CommitCard @commit={{commit}} />
-          {{/each}}
-        </div>
+        <VerticalCollection
+          @items={{this.commits}}
+          @estimateHeight={{120}}
+          @staticHeight={{false}}
+          @tagName="div"
+          @class="commits-list"
+          @useContentTags={{true}}
+          @containerSelector="body"
+          as |commit|
+        >
+          <CommitCard @commit={{commit}} />
+        </VerticalCollection>
       {{/if}}
     </div>
   </template>
