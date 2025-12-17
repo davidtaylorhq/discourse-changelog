@@ -10,7 +10,7 @@ import semver from 'semver';
 import CommitCard from './commit-card';
 import FeatureCard from './feature-card';
 import VerticalCollection from '@html-next/vertical-collection/components/vertical-collection/component';
-import { getCommitsBetween, getCommitType } from '../lib/git-utils.js';
+import { ChangelogData, getCommitType } from '../lib/git-utils.js';
 
 const COMMIT_TYPES = [
   { key: 'FEATURE', label: 'Feature', color: '#27ae60' },
@@ -25,12 +25,10 @@ const COMMIT_TYPES = [
 
 export default class CommitViewer extends Component {
   @service router;
-  @tracked isLoading = false;
+  @tracked data = new ChangelogData();
   @tracked startHash = '';
   @tracked endHash = '';
-  @tracked commitData = null; // {commits: {}, refs: {}, baseTag: ''}
   @tracked hiddenTypes = new Set();
-  @tracked newFeatures = [];
   @tracked startAdvancedMode = false;
   @tracked endAdvancedMode = false;
 
@@ -40,19 +38,11 @@ export default class CommitViewer extends Component {
   }
 
   async loadData() {
-    this.isLoading = true;
     try {
-      const [commitsModule, featuresModule] = await Promise.all([
-        import('/data/commits.json'),
-        import('/data/new-features.json'),
-      ]);
-      this.commitData = commitsModule.default;
-      this.newFeatures = featuresModule.default;
+      await this.data.load();
       this.loadQueryParams();
     } catch (error) {
-      this.error = `Failed to load data: ${error.message}`;
-    } finally {
-      this.isLoading = false;
+      console.error('Failed to load data:', error);
     }
   }
 
@@ -79,7 +69,7 @@ export default class CommitViewer extends Component {
     this.startAdvancedMode = !this.startAdvancedMode;
     if (!this.startAdvancedMode) {
       // Reset to first option when leaving advanced mode
-      this.startHash = this.commitData?.baseTag || '';
+      this.startHash = this.data.baseTag;
       this.updateQueryParams();
     }
   }
@@ -108,13 +98,13 @@ export default class CommitViewer extends Component {
 
   @cached
   get commits() {
-    if (!this.commitData) return [];
+    if (!this.data.commitData) return [];
 
-    const startRef = this.startHash.trim() || this.commitData.baseTag;
+    const startRef = this.startHash.trim() || this.data.baseTag;
     const endRef = this.endHash.trim() || 'main';
 
     // Get commits between the two refs using graph traversal
-    let filtered = getCommitsBetween(this.commitData, startRef, endRef);
+    let filtered = this.data.getCommitsBetween(startRef, endRef);
 
     // Filter by commit type
     if (this.hiddenTypes.size > 0) {
@@ -129,14 +119,14 @@ export default class CommitViewer extends Component {
 
   @cached
   get error() {
-    if (!this.commitData) return null;
+    if (!this.data.commitData) return null;
 
     // If user has specified custom refs and we got no commits, show error
     if (
       this.commits.length === 0 &&
       (this.startHash.trim() || this.endHash.trim())
     ) {
-      const startRef = this.startHash.trim() || this.commitData.baseTag;
+      const startRef = this.startHash.trim() || this.data.baseTag;
       const endRef = this.endHash.trim() || 'main';
       return `No commits found between "${startRef}" and "${endRef}"`;
     }
@@ -146,7 +136,7 @@ export default class CommitViewer extends Component {
 
   @cached
   get matchingFeatures() {
-    if (!this.commits.length || !this.newFeatures.length) {
+    if (!this.commits.length || !this.data.newFeatures.length) {
       return [];
     }
 
@@ -175,7 +165,7 @@ export default class CommitViewer extends Component {
     }
 
     // Find features that match either by hash or by version
-    return this.newFeatures.filter((feature) => {
+    return this.data.newFeatures.filter((feature) => {
       const discourseVersion = feature.discourse_version;
       if (!discourseVersion) return false;
 
@@ -231,10 +221,6 @@ export default class CommitViewer extends Component {
       : `${this.commits.length} commits`;
   }
 
-  get totalCommits() {
-    return this.commitData ? Object.keys(this.commitData.commits).length : 0;
-  }
-
   get commitTypes() {
     return COMMIT_TYPES;
   }
@@ -258,38 +244,11 @@ export default class CommitViewer extends Component {
     return counts;
   }
 
-  get sortedRefs() {
-    if (!this.commitData) return [];
-
-    const refs = [];
-
-    // Add branches first
-    Object.keys(this.commitData.refs.branches).forEach((branch) => {
-      refs.push({ value: branch, label: branch, type: 'branch' });
-    });
-
-    // Add tags sorted in descending order
-    const tags = Object.keys(this.commitData.refs.tags).sort((a, b) => {
-      const aVersion = semver.coerce(a);
-      const bVersion = semver.coerce(b);
-      if (aVersion && bVersion) {
-        return semver.rcompare(aVersion, bVersion);
-      }
-      return b.localeCompare(a);
-    });
-
-    tags.forEach((tag) => {
-      refs.push({ value: tag, label: tag, type: 'tag' });
-    });
-
-    return refs;
-  }
-
   <template>
     <div class="commit-viewer">
       <div class="header">
         <h1>Discourse Changelog</h1>
-        <p>View commits since v3.4.0 (total: {{this.totalCommits}} commits)</p>
+        <p>View commits since v3.4.0 (total: {{this.data.totalCommits}} commits)</p>
       </div>
 
       <div class="form-section">
@@ -318,14 +277,14 @@ export default class CommitViewer extends Component {
           {{else}}
             <select
               id="start-ref"
-              value={{if this.startHash this.startHash this.commitData.baseTag}}
+              value={{if this.startHash this.startHash this.data.baseTag}}
               {{on "change" this.updateStartRef}}
             >
-              <option value={{this.commitData.baseTag}}>
-                {{this.commitData.baseTag}}
+              <option value={{this.data.baseTag}}>
+                {{this.data.baseTag}}
                 (base)
               </option>
-              {{#each this.sortedRefs as |ref|}}
+              {{#each this.data.sortedRefs as |ref|}}
                 <option value={{ref.value}}>
                   {{ref.label}}
                 </option>
@@ -363,7 +322,7 @@ export default class CommitViewer extends Component {
               value={{if this.endHash this.endHash "main"}}
               {{on "change" this.updateEndRef}}
             >
-              {{#each this.sortedRefs as |ref|}}
+              {{#each this.data.sortedRefs as |ref|}}
                 <option value={{ref.value}}>
                   {{ref.label}}
                 </option>
@@ -414,7 +373,7 @@ export default class CommitViewer extends Component {
         </div>
       {{/if}}
 
-      {{#if this.isLoading}}
+      {{#if this.data.isLoading}}
         <div class="loading">Loading commit data...</div>
       {{/if}}
 
