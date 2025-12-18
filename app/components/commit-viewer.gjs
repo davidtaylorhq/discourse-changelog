@@ -10,7 +10,11 @@ import semver from 'semver';
 import CommitCard from './commit-card';
 import FeatureCard from './feature-card';
 import VerticalCollection from '@html-next/vertical-collection/components/vertical-collection/component';
-import { ChangelogData, getCommitType } from '../lib/git-utils.js';
+import {
+  ChangelogData,
+  getCommitType,
+  parseVersion,
+} from '../lib/git-utils.js';
 
 const COMMIT_TYPES = [
   { key: 'FEATURE', label: 'Feature', color: '#27ae60' },
@@ -31,6 +35,7 @@ export default class CommitViewer extends Component {
   @tracked hiddenTypes = new Set();
   @tracked startAdvancedMode = false;
   @tracked endAdvancedMode = false;
+  @tracked showSelectorUI = false;
 
   constructor() {
     super(...arguments);
@@ -62,7 +67,8 @@ export default class CommitViewer extends Component {
       return false;
     }
     const endRef = this.endHash.trim() || DEFAULT_END_REF;
-    const computedStart = this.data.getPreviousVersion(endRef) || DEFAULT_START_REF;
+    const computedStart =
+      this.data.getPreviousVersion(endRef) || DEFAULT_START_REF;
     return value === computedStart;
   };
 
@@ -163,55 +169,33 @@ export default class CommitViewer extends Component {
     // Create a Set of commit hashes for quick lookup
     const commitHashes = new Set(this.commits.map((c) => c.hash));
 
-    // Get version range from commits (strip +### suffix for comparison)
-    const versions = this.commits
-      .map((c) => c.version?.replace(/\s*\+\d+$/, ''))
-      .filter((v) => v && semver.valid(semver.coerce(v)));
+    const newestVersion = parseVersion(
+      this.commits[0].version?.replace(/\s*\+\d+$/, '')
+    );
 
-    let oldestVersion = null;
-    let newestVersion = null;
+    const oldestVersion = parseVersion(
+      this.commits.at(-1).version?.replace(/\s*\+\d+$/, '')
+    );
 
-    if (versions.length > 0) {
-      // Sort versions to find min/max
-      const sortedVersions = versions
-        .map((v) => semver.coerce(v))
-        .filter((v) => v)
-        .sort(semver.compare);
-
-      if (sortedVersions.length > 0) {
-        oldestVersion = sortedVersions[0];
-        newestVersion = sortedVersions[sortedVersions.length - 1];
-      }
-    }
+    console.log(oldestVersion, newestVersion);
 
     // Find features that match either by hash or by version
     return this.data.newFeatures.filter((feature) => {
       const discourseVersion = feature.discourse_version;
       if (!discourseVersion) return false;
 
-      // Check if it's a full hash (40 characters) and if it matches any commit
-      if (
-        discourseVersion.length === 40 &&
-        commitHashes.has(discourseVersion)
-      ) {
-        return true;
+      if (discourseVersion.match(/\d+\.\d+\.\d+/)) {
+        const parsedVersion = parseVersion(discourseVersion);
+        return (
+          semver.gt(parsedVersion, oldestVersion) &&
+          semver.lte(parsedVersion, newestVersion)
+        );
+      } else {
+        const fullCommitHash = this.data.resolveRef(discourseVersion);
+        return commitHashes.has(fullCommitHash);
       }
-
-      // Otherwise, try semver comparison
-      if (oldestVersion && newestVersion) {
-        const featureVersion = semver.coerce(discourseVersion);
-        if (featureVersion) {
-          return (
-            semver.gte(featureVersion, oldestVersion) &&
-            semver.lte(featureVersion, newestVersion)
-          );
-        }
-      }
-
-      return false;
     });
   }
-
 
   @action
   isTypeHidden(typeKey) {
@@ -226,6 +210,11 @@ export default class CommitViewer extends Component {
       this.hiddenTypes.add(typeKey);
     }
     this.hiddenTypes = new Set(this.hiddenTypes); // Trigger reactivity
+  }
+
+  @action
+  toggleSelectorUI() {
+    this.showSelectorUI = !this.showSelectorUI;
   }
 
   get formattedCommitCount() {
@@ -265,105 +254,143 @@ export default class CommitViewer extends Component {
     return counts;
   }
 
+  get displayStartRef() {
+    if (!this.data.commitData) return '';
+    const endRef = this.endHash.trim() || DEFAULT_END_REF;
+    let startRef = this.startHash.trim();
+    if (!startRef) {
+      startRef = this.data.getPreviousVersion(endRef) || DEFAULT_START_REF;
+    }
+    return startRef;
+  }
+
+  get displayEndRef() {
+    return this.endHash.trim() || DEFAULT_END_REF;
+  }
+
   <template>
     <div class="commit-viewer">
+      <a href="/" class="back-to-versions">← Back to Versions</a>
       <div class="header">
         <h1>Discourse Changelog</h1>
-      </div>
-
-      <div class="form-section">
-        <div class="input-group">
-          <div class="input-header">
-            <label for="start-ref">Start:</label>
-            <button
-              type="button"
-              class="advanced-toggle"
-              {{on "click" this.toggleStartAdvancedMode}}
-            >
-              {{if this.startAdvancedMode "Use Dropdown" "Advanced"}}
-            </button>
-          </div>
-
-          {{#if this.startAdvancedMode}}
-            <input
-              id="start-ref"
-              type="text"
-              value={{this.startHash}}
-              placeholder="Enter commit hash..."
-              {{on "input" this.updateStartHash}}
-            />
-            <small class="input-help">Enter a specific commit hash (full or
-              partial)</small>
-          {{else}}
-            <select
-              id="start-ref"
-              {{on "change" this.updateStartRef}}
-            >
-              <optgroup label="Branches">
-                {{#each this.data.branches as |ref|}}
-                  <option value={{ref.value}} selected={{this.isStartSelected ref.value}}>
-                    {{ref.label}}
-                  </option>
-                {{/each}}
-              </optgroup>
-              <optgroup label="Tags">
-                {{#each this.data.sortedTags as |ref|}}
-                  <option value={{ref.value}} selected={{this.isStartSelected ref.value}}>
-                    {{ref.label}}
-                  </option>
-                {{/each}}
-              </optgroup>
-            </select>
-            <small class="input-help">Select a tag or branch to start from</small>
-          {{/if}}
-        </div>
-
-        <div class="input-group">
-          <div class="input-header">
-            <label for="end-ref">End:</label>
-            <button
-              type="button"
-              class="advanced-toggle"
-              {{on "click" this.toggleEndAdvancedMode}}
-            >
-              {{if this.endAdvancedMode "Use Dropdown" "Advanced"}}
-            </button>
-          </div>
-
-          {{#if this.endAdvancedMode}}
-            <input
-              id="end-ref"
-              type="text"
-              value={{this.endHash}}
-              placeholder="Enter commit hash..."
-              {{on "input" this.updateEndHash}}
-            />
-            <small class="input-help">Enter a specific commit hash (full or
-              partial)</small>
-          {{else}}
-            <select
-              id="end-ref"
-              {{on "change" this.updateEndRef}}
-            >
-              <optgroup label="Branches">
-                {{#each this.data.branches as |ref|}}
-                  <option value={{ref.value}} selected={{this.isEndSelected ref.value}}>
-                    {{ref.label}}
-                  </option>
-                {{/each}}
-              </optgroup>
-              <optgroup label="Tags">
-                {{#each this.data.sortedTags as |ref|}}
-                  <option value={{ref.value}} selected={{this.isEndSelected ref.value}}>
-                    {{ref.label}}
-                  </option>
-                {{/each}}
-              </optgroup>
-            </select>
-            <small class="input-help">Select a tag or branch to end at</small>
-          {{/if}}
+        <div class="changelog-info">
+          <p class="changelog-range">
+            <strong>{{this.displayStartRef}}</strong>
+            →
+            <strong>{{this.displayEndRef}}</strong>
+          </p>
+          <button
+            type="button"
+            class="toggle-selector-btn"
+            {{on "click" this.toggleSelectorUI}}
+          >
+            {{if this.showSelectorUI "Hide" "Customize"}}
+            Range
+          </button>
         </div>
       </div>
+
+      {{#if this.showSelectorUI}}
+        <div class="form-section">
+          <div class="input-group">
+            <div class="input-header">
+              <label for="start-ref">Start:</label>
+              <button
+                type="button"
+                class="advanced-toggle"
+                {{on "click" this.toggleStartAdvancedMode}}
+              >
+                {{if this.startAdvancedMode "Use Dropdown" "Advanced"}}
+              </button>
+            </div>
+
+            {{#if this.startAdvancedMode}}
+              <input
+                id="start-ref"
+                type="text"
+                value={{this.startHash}}
+                placeholder="Enter commit hash..."
+                {{on "input" this.updateStartHash}}
+              />
+              <small class="input-help">Enter a specific commit hash (full or
+                partial)</small>
+            {{else}}
+              <select id="start-ref" {{on "change" this.updateStartRef}}>
+                <optgroup label="Branches">
+                  {{#each this.data.branches as |ref|}}
+                    <option
+                      value={{ref.value}}
+                      selected={{this.isStartSelected ref.value}}
+                    >
+                      {{ref.label}}
+                    </option>
+                  {{/each}}
+                </optgroup>
+                <optgroup label="Tags">
+                  {{#each this.data.sortedTags as |ref|}}
+                    <option
+                      value={{ref.value}}
+                      selected={{this.isStartSelected ref.value}}
+                    >
+                      {{ref.label}}
+                    </option>
+                  {{/each}}
+                </optgroup>
+              </select>
+              <small class="input-help">Select a tag or branch to start from</small>
+            {{/if}}
+          </div>
+
+          <div class="input-group">
+            <div class="input-header">
+              <label for="end-ref">End:</label>
+              <button
+                type="button"
+                class="advanced-toggle"
+                {{on "click" this.toggleEndAdvancedMode}}
+              >
+                {{if this.endAdvancedMode "Use Dropdown" "Advanced"}}
+              </button>
+            </div>
+
+            {{#if this.endAdvancedMode}}
+              <input
+                id="end-ref"
+                type="text"
+                value={{this.endHash}}
+                placeholder="Enter commit hash..."
+                {{on "input" this.updateEndHash}}
+              />
+              <small class="input-help">Enter a specific commit hash (full or
+                partial)</small>
+            {{else}}
+              <select id="end-ref" {{on "change" this.updateEndRef}}>
+                <optgroup label="Branches">
+                  {{#each this.data.branches as |ref|}}
+                    <option
+                      value={{ref.value}}
+                      selected={{this.isEndSelected ref.value}}
+                    >
+                      {{ref.label}}
+                    </option>
+                  {{/each}}
+                </optgroup>
+                <optgroup label="Tags">
+                  {{#each this.data.sortedTags as |ref|}}
+                    <option
+                      value={{ref.value}}
+                      selected={{this.isEndSelected ref.value}}
+                    >
+                      {{ref.label}}
+                    </option>
+                  {{/each}}
+                </optgroup>
+              </select>
+              <small class="input-help">Select a tag or branch to end at</small>
+            {{/if}}
+          </div>
+        </div>
+      {{/if}}
 
       {{#if this.matchingFeatures.length}}
         <details class="collapsible-section" open>
@@ -384,45 +411,45 @@ export default class CommitViewer extends Component {
         </summary>
 
         <div class="filter-section">
-        <div class="filter-pills">
-          {{#each this.commitTypes as |type|}}
-            <button
-              type="button"
-              class="filter-pill {{if (this.isTypeHidden type.key) 'hidden'}}"
-              style={{htmlSafe (concat "--pill-color: " type.color)}}
-              {{on "click" (fn this.toggleCommitType type.key)}}
-            >
-              {{type.label}}
-              ({{get this.commitTypeCounts type.key}})
-            </button>
-          {{/each}}
+          <div class="filter-pills">
+            {{#each this.commitTypes as |type|}}
+              <button
+                type="button"
+                class="filter-pill {{if (this.isTypeHidden type.key) 'hidden'}}"
+                style={{htmlSafe (concat "--pill-color: " type.color)}}
+                {{on "click" (fn this.toggleCommitType type.key)}}
+              >
+                {{type.label}}
+                ({{get this.commitTypeCounts type.key}})
+              </button>
+            {{/each}}
+          </div>
         </div>
-      </div>
 
-      {{#if this.error}}
-        <div class="error">
-          {{this.error}}
-        </div>
-      {{/if}}
+        {{#if this.error}}
+          <div class="error">
+            {{this.error}}
+          </div>
+        {{/if}}
 
-      {{#if this.data.isLoading}}
-        <div class="loading">Loading commit data...</div>
-      {{/if}}
+        {{#if this.data.isLoading}}
+          <div class="loading">Loading commit data...</div>
+        {{/if}}
 
-      {{#if this.commits.length}}
-        <VerticalCollection
-          @items={{this.commits}}
-          @estimateHeight={{120}}
-          @staticHeight={{false}}
-          @tagName="div"
-          @class="commits-list"
-          @useContentTags={{true}}
-          @containerSelector="body"
-          as |commit|
-        >
-          <CommitCard @commit={{commit}} />
-        </VerticalCollection>
-      {{/if}}
+        {{#if this.commits.length}}
+          <VerticalCollection
+            @items={{this.commits}}
+            @estimateHeight={{120}}
+            @staticHeight={{false}}
+            @tagName="div"
+            @class="commits-list"
+            @useContentTags={{true}}
+            @containerSelector="body"
+            as |commit|
+          >
+            <CommitCard @commit={{commit}} />
+          </VerticalCollection>
+        {{/if}}
       </details>
     </div>
   </template>

@@ -12,6 +12,24 @@ body {
 .commit-viewer {
   max-width: 900px;
   margin: 0 auto;
+  position: relative;
+}
+
+.back-to-versions {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.back-to-versions:hover {
+  background: #f0f8ff;
+  color: #2980b9;
 }
 
 .header {
@@ -27,6 +45,43 @@ body {
 .header p {
   color: #7f8c8d;
   font-size: 1.1rem;
+}
+
+.changelog-info {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.changelog-range {
+  color: #555;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.changelog-range strong {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.toggle-selector-btn {
+  padding: 0.4rem 1rem;
+  border: 1px solid #d0d0d0;
+  background: #f8f8f8;
+  color: #666;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-selector-btn:hover {
+  background: #e8e8e8;
+  border-color: #b0b0b0;
+  color: #555;
 }
 
 .form-section {

@@ -39,21 +39,10 @@ export class ChangelogData {
   get sortedTags() {
     if (!this.commitData) return [];
 
-    // Filter out pre-release tags ending with -latest
-    const filteredTags = Object.keys(this.commitData.refs.tags).filter(
-      (tag) => !tag.endsWith('-latest')
-    );
-
     // Sort tags in descending order
-    const tags = filteredTags.sort((a, b) => {
-      // Convert beta notation to proper semver prerelease format
-      // v3.5.0.beta1 -> v3.5.0-beta.1
-      const normalizeTag = (tag) => {
-        return tag.replace(/\.beta(\d+)$/, '-beta.$1');
-      };
-
-      const aNormalized = normalizeTag(a);
-      const bNormalized = normalizeTag(b);
+    const tags = Object.keys(this.commitData.refs.tags).sort((a, b) => {
+      const aNormalized = normalizeVersion(a);
+      const bNormalized = normalizeVersion(b);
 
       const aVersion = semver.valid(aNormalized);
       const bVersion = semver.valid(bNormalized);
@@ -212,6 +201,18 @@ export class ChangelogData {
       .map((hash) => this.commitData.commits[hash])
       .filter((c) => c);
   }
+}
+
+// Normalize version tags to proper semver format
+// v3.5.0.beta1 -> v3.5.0-beta.1
+export function normalizeVersion(version) {
+  return version.replace(/\.beta(\d+)$/, '-beta.$1');
+}
+
+// Parse a version string to a semver object, handling beta notation
+export function parseVersion(version) {
+  const normalized = normalizeVersion(version);
+  return semver.parse(normalized);
 }
 
 // Extract commit type from subject
