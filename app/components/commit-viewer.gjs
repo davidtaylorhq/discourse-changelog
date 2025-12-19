@@ -23,6 +23,7 @@ const COMMIT_TYPES = [
   { key: 'UX', label: 'UX', color: '#2980b9' },
   { key: 'A11Y', label: 'Accessibility', color: '#16a085' },
   { key: 'SECURITY', label: 'Security', color: '#d35400' },
+  { key: 'TRANSLATIONS', label: 'Translations', color: '#e91e63' },
   { key: 'DEV', label: 'Dev', color: '#7f8c8d' },
   { key: 'OTHER', label: 'Other', color: '#95a5a6' },
 ];

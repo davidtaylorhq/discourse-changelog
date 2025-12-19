@@ -4,6 +4,7 @@ import { on } from '@ember/modifier';
 import { htmlSafe } from '@ember/template';
 import './commit-card.css';
 import { concat } from '@ember/helper';
+import { getCommitType } from '../lib/git-utils.js';
 
 function escapeHtml(text) {
   const div = document.createElement('div');
@@ -18,6 +19,7 @@ const COMMIT_TYPE_CONFIG = {
   UX: { label: 'UX', color: '#2980b9' },
   A11Y: { label: 'Accessibility', color: '#16a085' },
   SECURITY: { label: 'Security', color: '#d35400' },
+  TRANSLATIONS: { label: 'Translations', color: '#e91e63' },
   DEV: { label: 'Dev', color: '#7f8c8d' },
 };
 
@@ -45,10 +47,7 @@ export default class CommitCard extends Component {
   }
 
   get commitType() {
-    const match = this.args.commit.subject.match(
-      /^(FEATURE|FIX|PERF|UX|A11Y|SECURITY|DEV):/
-    );
-    return match ? match[1] : null;
+    return getCommitType(this.args.commit.subject);
   }
 
   get commitTypeConfig() {

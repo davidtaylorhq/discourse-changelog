@@ -217,6 +217,13 @@ export function parseVersion(version) {
 
 // Extract commit type from subject
 export function getCommitType(subject) {
+  // Check for explicit type prefix
   const match = subject.match(/^(FEATURE|FIX|PERF|UX|A11Y|SECURITY|DEV):/);
-  return match ? match[1] : null;
+  if (match) return match[1];
+
+  // Check for special patterns
+  if (subject.startsWith('Update translations')) return 'TRANSLATIONS';
+  if (subject.startsWith('Build(deps')) return 'DEV';
+
+  return null;
 }
