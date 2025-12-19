@@ -33,7 +33,7 @@ const DEFAULT_END_REF = 'latest';
 
 export default class CommitViewer extends Component {
   @tracked data = new ChangelogData();
-  @tracked hiddenTypes = new Set();
+  @tracked activeTypes = new Set();
   @tracked startAdvancedMode = false;
   @tracked endAdvancedMode = false;
   @tracked showSelectorUI = false;
@@ -138,11 +138,11 @@ export default class CommitViewer extends Component {
   get commits() {
     let filtered = this.allCommits;
 
-    // Filter by commit type
-    if (this.hiddenTypes.size > 0) {
+    // Filter by commit type - show only active types if any are selected
+    if (this.activeTypes.size > 0) {
       filtered = filtered.filter((commit) => {
         const type = getCommitType(commit.subject) || 'OTHER';
-        return !this.hiddenTypes.has(type);
+        return this.activeTypes.has(type);
       });
     }
 
@@ -204,18 +204,36 @@ export default class CommitViewer extends Component {
   }
 
   @action
-  isTypeHidden(typeKey) {
-    return this.hiddenTypes.has(typeKey);
+  isTypeActive(typeKey) {
+    // If no types are active, all types are shown (return true)
+    if (this.activeTypes.size === 0) return true;
+    return this.activeTypes.has(typeKey);
   }
 
   @action
-  toggleCommitType(typeKey) {
-    if (this.hiddenTypes.has(typeKey)) {
-      this.hiddenTypes.delete(typeKey);
+  toggleCommitType(typeKey, event) {
+    const isModifierKey = event.metaKey || event.ctrlKey;
+
+    if (isModifierKey) {
+      // Mod+click: toggle this type in the active set
+      if (this.activeTypes.has(typeKey)) {
+        this.activeTypes.delete(typeKey);
+      } else {
+        this.activeTypes.add(typeKey);
+      }
     } else {
-      this.hiddenTypes.add(typeKey);
+      // Regular click
+      if (this.activeTypes.size === 1 && this.activeTypes.has(typeKey)) {
+        // If this is the only active type, clear filter (show all)
+        this.activeTypes.clear();
+      } else {
+        // Otherwise, make this the only active type
+        this.activeTypes.clear();
+        this.activeTypes.add(typeKey);
+      }
     }
-    this.hiddenTypes = new Set(this.hiddenTypes); // Trigger reactivity
+
+    this.activeTypes = new Set(this.activeTypes); // Trigger reactivity
   }
 
   @action
@@ -421,7 +439,7 @@ export default class CommitViewer extends Component {
             {{#each this.commitTypes as |type|}}
               <button
                 type="button"
-                class="filter-pill {{if (this.isTypeHidden type.key) 'hidden'}}"
+                class="filter-pill {{unless (this.isTypeActive type.key) 'hidden'}}"
                 style={{htmlSafe (concat "--pill-color: " type.color)}}
                 {{on "click" (fn this.toggleCommitType type.key)}}
               >
