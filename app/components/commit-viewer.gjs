@@ -37,6 +37,7 @@ export default class CommitViewer extends Component {
   @tracked startAdvancedMode = false;
   @tracked endAdvancedMode = false;
   @tracked showSelectorUI = false;
+  @tracked stripPrefixes = false;
 
   constructor() {
     super(...arguments);
@@ -239,6 +240,11 @@ export default class CommitViewer extends Component {
   @action
   toggleSelectorUI() {
     this.showSelectorUI = !this.showSelectorUI;
+  }
+
+  @action
+  toggleStripPrefixes() {
+    this.stripPrefixes = !this.stripPrefixes;
   }
 
   get formattedCommitCount() {
@@ -471,10 +477,17 @@ export default class CommitViewer extends Component {
             @containerSelector="body"
             as |commit|
           >
-            <CommitCard @commit={{commit}} />
+            <CommitCard @commit={{commit}} @stripPrefix={{this.stripPrefixes}} />
           </VerticalCollection>
         {{/if}}
       </details>
+
+      <div style="margin-top: 2rem; padding: 1rem; border-top: 1px solid #ddd; color: #666; font-size: 0.85rem;">
+        <label>
+          <input type="checkbox" checked={{this.stripPrefixes}} {{on "change" this.toggleStripPrefixes}} />
+          Strip commit type prefixes (debug)
+        </label>
+      </div>
     </div>
   </template>
 }
