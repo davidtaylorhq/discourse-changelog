@@ -32,7 +32,11 @@ export default class CommitCard extends Component {
 
   get formattedDate() {
     const date = new Date(this.args.commit.date);
-    return date.toLocaleDateString();
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   }
 
   get formattedTime() {

@@ -7,7 +7,7 @@ export default class FeatureCard extends Component {
     const date = new Date(this.args.feature.released_at);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric'
     });
   }
