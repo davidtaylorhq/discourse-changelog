@@ -2,7 +2,7 @@
   {
     "version": "2026.01",
     "releaseDate": "2026-01",
-    "supportEndDate": "2026-04",
+    "supportEndDate": "2026-09",
     "isESR": true,
     "status": "upcoming"
   },
@@ -29,7 +29,7 @@
   },
   {
     "version": "3.4",
-    "releaseDate": "2025-02-24",
+    "releaseDate": "2025-02-04",
     "supportEndDate": "2025-08-19",
     "isESR": true,
     "status": "end-of-life"

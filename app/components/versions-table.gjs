@@ -11,7 +11,6 @@ const eq = (a, b) => a === b;
 export default class VersionsTable extends Component {
   @tracked data = new ChangelogData();
   @tracked versionSupport = [];
-  @tracked expandedVersions = new Set();
 
   constructor() {
     super(...arguments);
@@ -130,6 +129,14 @@ export default class VersionsTable extends Component {
           return match;
         });
         group.headerVersion = dotZeroVersion || group.versions[0];
+
+        // Override with the release date from version-support.json for consistency
+        if (group.headerVersion && supportEntry.releaseDate) {
+          group.headerVersion = {
+            ...group.headerVersion,
+            date: supportEntry.releaseDate
+          };
+        }
       }
 
       groups.push(group);
@@ -185,19 +192,18 @@ export default class VersionsTable extends Component {
     }
   }
 
-  @action
-  toggleExpanded(minorVersion) {
-    if (this.expandedVersions.has(minorVersion)) {
-      this.expandedVersions.delete(minorVersion);
-    } else {
-      this.expandedVersions.add(minorVersion);
-    }
-    this.expandedVersions = new Set(this.expandedVersions); // Trigger reactivity
-  }
+  isPlannedDate(isoString) {
+    if (!isoString) return false;
 
-  @action
-  isExpanded(minorVersion) {
-    return this.expandedVersions.has(minorVersion);
+    // If it's yyyy-mm format (imprecise), always consider it "planned"
+    if (/^\d{4}-\d{2}$/.test(isoString)) {
+      return true;
+    }
+
+    // Otherwise it's yyyy-mm-dd format - check if it's in the future
+    const date = new Date(isoString);
+    const now = new Date();
+    return date > now;
   }
 
   <template>
@@ -210,102 +216,94 @@ export default class VersionsTable extends Component {
       {{#if this.data.isLoading}}
         <div class="loading">Loading versions...</div>
       {{else}}
-        <table class="versions-table">
-          <thead>
-            <tr>
-              <th>Release</th>
-              <th>Released</th>
-              <th>Latest Version</th>
-              <th>End of Life</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{#each this.groupedVersions as |group|}}
-              <tr class="minor-version {{if (eq group.supportInfo.status 'upcoming') 'upcoming-version'}} {{if (eq group.supportInfo.status 'in-development') 'in-development-version'}} {{if (eq group.supportInfo.status 'active') 'active-version'}} {{if (eq group.supportInfo.status 'end-of-life') 'eol-version'}} {{if group.supportInfo.isESR 'esr-version'}}">
-                <td>
+        <div class="versions-cards">
+          {{#each this.groupedVersions as |group|}}
+            <div class="version-card {{if (eq group.supportInfo.status 'upcoming') 'upcoming-version'}} {{if (eq group.supportInfo.status 'in-development') 'in-development-version'}} {{if (eq group.supportInfo.status 'active') 'active-version'}} {{if (eq group.supportInfo.status 'end-of-life') 'eol-version'}} {{if group.supportInfo.isESR 'esr-version'}}">
+              <div class="card-header">
+                <div class="version-title">
                   {{#if (eq group.supportInfo.status "in-development")}}
-                    <a href="/changelog?end=latest">v{{group.minorVersion}}</a>
+                    <a href="/changelog?end=latest" class="version-link">v{{group.minorVersion}}</a>
                   {{else if (eq group.supportInfo.status "upcoming")}}
-                    <span class="upcoming-version-text">v{{group.minorVersion}}</span>
+                    <span class="version-name">v{{group.minorVersion}}</span>
                   {{else}}
-                    <button type="button" class="expand-button" {{on "click" (fn this.toggleExpanded group.minorVersion)}}>
-                      <span class="caret {{if (this.isExpanded group.minorVersion) 'expanded'}}">▶</span>
-                    </button>
-                    <a
-                      href="/changelog?end={{group.headerVersion.version}}"
-                    >v{{group.minorVersion}}</a>
+                    <a href="/changelog?end={{group.headerVersion.version}}" class="version-link">v{{group.minorVersion}}</a>
                   {{/if}}
-                </td>
-                <td>
+                  {{#if group.supportInfo.isESR}}
+                    <span class="esr-indicator">ESR</span>
+                  {{/if}}
+                </div>
+                <div class="status-badge support-status-{{group.supportInfo.status}}">
                   {{#if (eq group.supportInfo.status "in-development")}}
-                    <span class="upcoming-date">{{this.formatDate group.headerVersion.date}}</span>
+                    Active development
+                  {{else if (eq group.supportInfo.status "active")}}
+                    Supported
+                  {{else if (eq group.supportInfo.status "end-of-life")}}
+                    End of Life
                   {{else if (eq group.supportInfo.status "upcoming")}}
-                    <span class="upcoming-date">{{this.formatDate group.headerVersion.date}}</span>
-                  {{else}}
-                    <span class="relative-date">
-                      {{this.getRelativeTime group.headerVersion.date}}
-                      <span class="date-badge">{{this.formatDate group.headerVersion.date}}</span>
-                    </span>
+                    Upcoming
                   {{/if}}
-                </td>
-                <td>
-                  {{#if (eq group.supportInfo.status "in-development")}}
-                    <a href="/changelog?end=latest">v{{group.minorVersion}}.0-latest</a>
-                  {{else if (eq group.supportInfo.status "upcoming")}}
-                    <span class="upcoming-version-text">—</span>
-                  {{else if (get group.versions "0")}}
-                    <a href="/changelog?end={{get (get group.versions "0") "version"}}">{{get (get group.versions "0") "version"}}</a>
-                  {{/if}}
-                </td>
-                <td>
-                  {{#if group.supportInfo.supportEndDate}}
-                    {{this.formatDate group.supportInfo.supportEndDate}}
-                  {{else}}
-                    —
-                  {{/if}}
-                </td>
-                <td>
-                  <span
-                    class="support-status support-status-{{group.supportInfo.status}}"
-                  >
+                </div>
+              </div>
+
+              <div class="card-body">
+                <div class="card-row">
+                  <div class="card-label">
+                    {{#if (this.isPlannedDate group.headerVersion.date)}}
+                      Planned release
+                    {{else}}
+                      Released
+                    {{/if}}
+                  </div>
+                  <div class="card-value">
                     {{#if (eq group.supportInfo.status "in-development")}}
-                      Active development
-                    {{else if (eq group.supportInfo.status "active")}}
-                      Supported
-                    {{else if (eq group.supportInfo.status "end-of-life")}}
-                      End of Life
+                      <span class="upcoming-date">{{this.formatDate group.headerVersion.date}}</span>
                     {{else if (eq group.supportInfo.status "upcoming")}}
-                      Upcoming
+                      <span class="upcoming-date">{{this.formatDate group.headerVersion.date}}</span>
+                    {{else}}
+                      <span class="relative-date">
+                        {{this.getRelativeTime group.headerVersion.date}}
+                        <span class="date-badge">{{this.formatDate group.headerVersion.date}}</span>
+                      </span>
                     {{/if}}
-                    {{#if group.supportInfo.isESR}}
-                      <span class="esr-text"> (ESR)</span>
+                  </div>
+                </div>
+
+                <div class="card-row">
+                  <div class="card-label">
+                    {{#if (this.isPlannedDate group.supportInfo.supportEndDate)}}
+                      Planned end of life
+                    {{else}}
+                      End of Life
                     {{/if}}
-                  </span>
-                </td>
-              </tr>
-              {{#if (this.isExpanded group.minorVersion)}}
-                {{#each group.versions as |v|}}
-                  {{#unless v.isUpcoming}}
-                    <tr class="indented">
-                      <td colspan="2">
-                        <a href="/changelog?end={{v.version}}">{{v.version}}</a>
-                      </td>
-                      <td>
+                  </div>
+                  <div class="card-value">
+                    {{#if group.supportInfo.supportEndDate}}
+                      {{this.formatDate group.supportInfo.supportEndDate}}
+                    {{else}}
+                      <span class="muted-text">—</span>
+                    {{/if}}
+                  </div>
+                </div>
+              </div>
+
+              {{#unless (eq group.supportInfo.status "upcoming")}}
+                {{#unless (eq group.supportInfo.status "in-development")}}
+                  <div class="patch-versions">
+                    {{#each group.versions as |v|}}
+                      <div class="patch-version-row">
+                        <a href="/changelog?end={{v.version}}" class="patch-version-link">{{v.version}}</a>
                         <span class="relative-date">
                           {{this.getRelativeTime v.date}}
                           <span class="date-badge">{{this.formatDate v.date}}</span>
                         </span>
-                      </td>
-                      <td></td>
-                      <td></td>
-                    </tr>
-                  {{/unless}}
-                {{/each}}
-              {{/if}}
-            {{/each}}
-          </tbody>
-        </table>
+                      </div>
+                    {{/each}}
+                  </div>
+                {{/unless}}
+              {{/unless}}
+            </div>
+          {{/each}}
+        </div>
       {{/if}}
     </div>
 
@@ -313,11 +311,11 @@ export default class VersionsTable extends Component {
       .versions-container {
         max-width: 900px;
         margin: 0 auto;
-        padding: 2rem 1rem;
+        padding: 1.5rem 1rem;
       }
 
       .header {
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
         text-align: center;
       }
 
@@ -337,177 +335,175 @@ export default class VersionsTable extends Component {
         color: #666;
       }
 
-      .versions-table {
-        width: 100%;
-        border-collapse: collapse;
+      .versions-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .version-card {
         background: white;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
+        border-radius: 6px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         overflow: hidden;
+        transition: box-shadow 0.2s;
       }
 
-      .versions-table thead {
-        background: #f7f7f7;
+      .version-card:hover {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       }
 
-      .versions-table th {
-        text-align: left;
-        padding: 1rem 1.5rem;
-        font-weight: 600;
-        color: #333;
-        border-bottom: 2px solid #e0e0e0;
-      }
-
-      .versions-table td {
-        padding: 1rem 1.5rem;
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
         border-bottom: 1px solid #f0f0f0;
       }
 
-      .versions-table tbody tr:hover {
-        background: #fafafa;
+      .version-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.25rem;
+        font-weight: 600;
       }
 
-      .versions-table a {
+      .version-link {
         color: #0066cc;
         text-decoration: none;
-        font-weight: 500;
       }
 
-      .versions-table a:hover {
+      .version-link:hover {
         text-decoration: underline;
       }
 
-      .versions-table tr.minor-version {
+      .version-name {
+        color: #333;
+      }
+
+      .status-badge {
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
         font-weight: 600;
-        background: #f7f7f7;
+        white-space: nowrap;
       }
 
-      .versions-table tr.minor-version td:nth-child(2),
-      .versions-table tr.minor-version td:nth-child(4) {
-        font-weight: normal;
+      .card-body {
+        padding: 0.75rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
       }
 
-      .versions-table tr.eol-version {
-        background: #f5f5f5 !important;
-        color: #999;
-      }
-
-      .versions-table tr.eol-version a {
-        color: #999;
-      }
-
-      .versions-table tr.active-version {
-        background: #f0f9f4 !important;
-      }
-
-      .versions-table tr.active-version.esr-version {
-        background: #f3e5f5 !important;
-      }
-
-      .versions-table tr.in-development-version {
-        background: #e8f5ee !important;
-      }
-
-      .versions-table tr.upcoming-version {
-        background: #f0f8ff !important;
-      }
-
-      .expand-button {
-        background: none;
-        border: none;
-        padding: 0;
-        margin-right: 0.5rem;
-        cursor: pointer;
-        display: inline-flex;
+      .card-row {
+        display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        width: 20px;
-        height: 20px;
+      }
+
+      .card-label {
+        color: #666;
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+
+      .card-value {
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+
+      .card-value a {
+        color: #0066cc;
+        text-decoration: none;
+      }
+
+      .card-value a:hover {
+        text-decoration: underline;
+      }
+
+      .muted-text {
+        color: #999;
+      }
+
+      .patch-versions {
+        border-top: 1px solid #f0f0f0;
+        padding: 0.5rem 1rem;
+        background: #fafafa;
+      }
+
+      .patch-version-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.35rem 0;
+      }
+
+      .patch-version-link {
+        color: #0066cc;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+
+      .patch-version-link:hover {
+        text-decoration: underline;
+      }
+
+      .version-card.eol-version .card-header {
+        background: #e8e8e8;
+      }
+
+      .version-card.eol-version {
+        opacity: 0.8;
+      }
+
+      .version-card.active-version .card-header {
+        background: #d4edda;
+      }
+
+      .version-card.in-development-version .card-header {
+        background: #c3e6cb;
+      }
+
+      .version-card.upcoming-version .card-header {
+        background: #d1ecf1;
+      }
+
+      .esr-indicator {
+        margin-left: 0.5rem;
+        display: inline-block;
+        padding: 0.15rem 0.4rem;
+        background: #9b59b6;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 600;
+        border-radius: 3px;
         vertical-align: middle;
       }
 
-      .expand-button:hover {
-        opacity: 0.7;
-      }
-
-      .caret {
-        display: inline-block;
-        transition: transform 0.2s;
-        font-size: 0.7rem;
-        color: #666;
-      }
-
-      .caret.expanded {
-        transform: rotate(90deg);
-      }
-
-      .versions-table tr.indented td:first-child {
-        padding-left: 3rem;
-      }
-
-      .versions-table tr.indented {
-        font-size: 0.95em;
-      }
-
-      .eol-version + .indented,
-      .eol-version ~ .indented {
-        background: #f5f5f5;
-        color: #999;
-      }
-
-      .eol-version ~ .indented a {
-        color: #999;
-      }
-
-      .active-version:not(.esr-version) ~ .indented {
-        background: #f0f9f4;
-      }
-
-      .active-version.esr-version ~ .indented {
-        background: #f3e5f5;
-      }
-
-      .in-development-version ~ .indented {
-        background: #e8f5ee;
-      }
-
-      .upcoming-version ~ .indented {
-        background: #f0f8ff;
-      }
-
-      .esr-text {
-        color: #666;
-        font-weight: normal;
-      }
-
-      .support-status {
-        font-size: 0.9rem;
-        font-weight: 600;
+      .version-card.eol-version .esr-indicator {
+        background: #95a5a6;
       }
 
       .support-status-active {
-        color: #27ae60;
+        background: #27ae60;
+        color: white;
       }
 
       .support-status-end-of-life {
-        color: #95a5a6;
+        background: #95a5a6;
+        color: white;
       }
 
       .support-status-upcoming {
-        color: #3498db;
+        background: #3498db;
+        color: white;
       }
 
       .support-status-in-development {
-        color: #27ae60;
-      }
-
-      .active-version.esr-version .support-status {
-        color: #9b59b6;
-      }
-
-      .upcoming-version-text {
-        font-weight: 600;
-        color: #555;
+        background: #27ae60;
+        color: white;
       }
 
       .upcoming-date {
@@ -518,25 +514,18 @@ export default class VersionsTable extends Component {
       .relative-date {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.4rem;
+        font-size: 0.9rem;
       }
 
       .date-badge {
         display: inline-block;
-        padding: 0.15rem 0.5rem;
+        padding: 0.1rem 0.4rem;
         background: #f0f0f0;
         color: #666;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         border-radius: 3px;
         font-weight: normal;
-      }
-
-      .in-development-version {
-        background: #f3e5f5 !important;
-      }
-
-      .in-development-date {
-        color: #9b59b6;
       }
     </style>
   </template>
