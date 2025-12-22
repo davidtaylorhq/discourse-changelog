@@ -5,6 +5,9 @@ import { htmlSafe } from '@ember/template';
 import './commit-card.css';
 import { concat } from '@ember/helper';
 import { getCommitType } from '../lib/git-utils.js';
+import { trackedWeakMap } from "@ember/reactive/collections";
+
+const expandedCommits = trackedWeakMap(new WeakMap());
 
 function escapeHtml(text) {
   const div = document.createElement('div');
@@ -83,6 +86,10 @@ export default class CommitCard extends Component {
     return `https://github.com/discourse/discourse/pull/${this.prNumber}`;
   }
 
+  get isExpanded() {
+    return expandedCommits.get(this.args.commit) || false;
+  }
+
   get bodyHtml() {
     if (!this.hasBody) return '';
 
@@ -107,11 +114,15 @@ export default class CommitCard extends Component {
       return;
     }
 
-    // Find the details element and toggle it
+    // Toggle the expanded state in the WeakMap
+    const currentState = expandedCommits.get(this.args.commit) || false;
+    expandedCommits.set(this.args.commit, !currentState);
+
+    // Manually toggle the details element to trigger re-render
     const card = event.currentTarget;
     const details = card.querySelector('.commit-details');
     if (details) {
-      details.open = !details.open;
+      details.open = !currentState;
     }
   }
 
@@ -161,7 +172,7 @@ export default class CommitCard extends Component {
         {{/if}}
       </div>
 
-      <details class="commit-details">
+      <details class="commit-details" open={{this.isExpanded}}>
         <summary class="commit-summary"></summary>
         <div class="commit-body">
           <div class="commit-meta-details">

@@ -467,8 +467,8 @@ export default class CommitViewer extends Component {
             @staticHeight={{false}}
             @tagName="div"
             @class="commits-list"
-            @useContentTags={{true}}
             @containerSelector="body"
+            @bufferSize={{5}}
             as |commit|
           >
             <CommitCard @commit={{commit}} />
