@@ -60,23 +60,63 @@ export default class CommitCard extends Component {
     // Strip known type prefixes
     subject = subject.replace(/^(FEATURE|FIX|PERF|UX|A11Y|SECURITY|DEV):\s*/, '');
 
+    // Strip PR references
+    subject = subject.replace(/\s*\(#\d+\)\s*$/, '');
+
     // Escape the entire text first
     const escaped = escapeHtml(subject);
-    // Then replace PR references with links (now safe)
+
+    return htmlSafe(escaped);
+  }
+
+  get hasBody() {
+    return this.args.commit.body && this.args.commit.body.trim().length > 0;
+  }
+
+  get prNumber() {
+    const match = this.args.commit.subject.match(/\(#(\d+)\)/);
+    return match ? match[1] : null;
+  }
+
+  get prUrl() {
+    if (!this.prNumber) return null;
+    return `https://github.com/discourse/discourse/pull/${this.prNumber}`;
+  }
+
+  get bodyHtml() {
+    if (!this.hasBody) return '';
+
+    const body = this.args.commit.body.trim();
+
+    // Escape HTML first
+    const escaped = escapeHtml(body);
+
+    // Then add hyperlinks for URLs (now safe)
     const withLinks = escaped.replace(
-      /\(#(\d+)\)/g,
-      '<a href="https://github.com/discourse/discourse/pull/$1" target="_blank" class="pr-link" onclick="event.stopPropagation()">(#$1)</a>'
+      /(https?:\/\/[^\s]+)/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer" class="commit-body-link" onclick="event.stopPropagation()">$1</a>'
     );
+
     return htmlSafe(withLinks);
   }
 
   @action
-  openCommit() {
-    window.open(this.commitUrl, '_blank');
+  toggleDetails(event) {
+    // Don't toggle if clicking on a link
+    if (event.target.tagName === 'A' || event.target.closest('a')) {
+      return;
+    }
+
+    // Find the details element and toggle it
+    const card = event.currentTarget;
+    const details = card.querySelector('.commit-details');
+    if (details) {
+      details.open = !details.open;
+    }
   }
 
   <template>
-    <div class="commit-card" {{on "click" this.openCommit}}>
+    <div class="commit-card expandable" {{on "click" this.toggleDetails}}>
       <div class="commit-header">
         <div class="commit-message">
           {{this.subjectWithLinks}}
@@ -90,18 +130,50 @@ export default class CommitCard extends Component {
               }}
             >{{this.commitTypeConfig.label}}</span>
           {{/if}}
-          <span class="commit-sha">
+          <a
+            href={{this.commitUrl}}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="commit-sha"
+            title="Open on GitHub"
+            onclick="event.stopPropagation()"
+          >
             {{this.shortHash}}
-          </span>
+          </a>
         </div>
       </div>
 
-      <div class="commit-meta">
-        <span class="commit-author">{{@commit.author}}</span>
-        <span class="commit-date">{{this.formattedDate}}
-          ·
-          {{this.formattedTime}}</span>
+      <div class="commit-meta-summary">
+        <span class="commit-date">{{this.formattedDate}}</span>
+        <span class="commit-time">{{this.formattedTime}}</span>
+        {{#if this.prNumber}}
+          <span class="commit-separator">·</span>
+          <a
+            href={{this.prUrl}}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="commit-pr-link"
+            title="Open PR on GitHub"
+            onclick="event.stopPropagation()"
+          >
+            #{{this.prNumber}}
+          </a>
+        {{/if}}
       </div>
+
+      <details class="commit-details">
+        <summary class="commit-summary"></summary>
+        <div class="commit-body">
+          <div class="commit-meta-details">
+            <span class="commit-author">Authored by {{@commit.author}}</span>
+            <span class="commit-separator">·</span>
+            <span class="commit-version">v{{@commit.version}}</span>
+          </div>
+          {{#if this.hasBody}}
+            <div class="commit-full-body">{{this.bodyHtml}}</div>
+          {{/if}}
+        </div>
+      </details>
     </div>
   </template>
 }
