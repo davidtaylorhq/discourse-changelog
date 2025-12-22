@@ -257,6 +257,7 @@ body {
   font-size: 0.95rem;
   transition: border-color 0.3s;
   background: white;
+  box-sizing: border-box;
 }
 
 .filter-input:focus {
