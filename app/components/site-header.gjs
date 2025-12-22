@@ -1,4 +1,5 @@
 import Component from '@glimmer/component';
+import Logo from './logo.gjs';
 import './site-header.css';
 
 export default class SiteHeader extends Component {
@@ -7,13 +8,11 @@ export default class SiteHeader extends Component {
     <header class="site-header">
       <div class="header-content">
         <div class="header-left">
-          <a href="https://discourse.org" class="logo-link">
-            <img src="/logo-small-light.png" alt="Discourse" class="logo logo-light" />
-            <img src="/logo-small-dark.png" alt="Discourse" class="logo logo-dark" />
-          </a>
-
           <h1 class="site-title">
-            <a href="/" class="title-link">Discourse Releases</a>
+            <a href="/" class="title-link">
+              <Logo class="logo" />
+              <span>Discourse Releases</span>
+            </a>
           </h1>
         </div>
 

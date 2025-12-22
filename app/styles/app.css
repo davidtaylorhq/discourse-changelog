@@ -28,21 +28,21 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-page: #1a1a1a;
-    --bg-card: #2d2d2d;
-    --bg-card-hover: #363636;
-    --bg-subtle: #242424;
-    --bg-code: #242424;
-    --text-primary: #e0e0e0;
-    --text-secondary: #b0b0b0;
-    --text-muted: #888;
-    --text-link: #5dade2;
-    --text-link-hover: #85c1e9;
-    --border-color: #404040;
-    --border-subtle: #333;
-    --shadow-sm: 0 2px 4px rgb(0 0 0 / 30%);
-    --shadow-md: 0 4px 12px rgb(0 0 0 / 40%);
-    --shadow-hover: 0 2px 6px rgb(0 0 0 / 35%);
+    --bg-page: #1f1f23;
+    --bg-card: #323237;
+    --bg-card-hover: #3a3a3f;
+    --bg-subtle: #2d2d30;
+    --bg-code: #2d2d30;
+    --text-primary: #e4e4e7;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    --text-link: #60a5fa;
+    --text-link-hover: #93c5fd;
+    --border-color: #4a4a52;
+    --border-subtle: #3a3a40;
+    --shadow-sm: 0 0 0 1px rgb(255 255 255 / 4%), 0 2px 8px rgb(0 0 0 / 40%);
+    --shadow-md: 0 0 0 1px rgb(255 255 255 / 5%), 0 4px 16px rgb(0 0 0 / 50%);
+    --shadow-hover: 0 0 0 1px rgb(255 255 255 / 6%), 0 4px 12px rgb(0 0 0 / 45%);
   }
 }
 

@@ -168,11 +168,21 @@
 }
 
 .version-card.active-version .card-header {
-  background: oklch(from var(--color-supported) l c h / 0.2);
+  background: var(--color-supported);
+}
+
+.version-card.active-version .version-link,
+.version-card.active-version .version-name {
+  color: white;
 }
 
 .version-card.in-development-version .card-header {
-  background: oklch(from var(--color-active-development) l c h / 0.2);
+  background: var(--color-active-development);
+}
+
+.version-card.in-development-version .version-link,
+.version-card.in-development-version .version-name {
+  color: white;
 }
 
 .esr-indicator {
@@ -191,19 +201,28 @@
   background: var(--color-end-of-life);
 }
 
-.support-status-active {
-  background: var(--color-supported);
+.version-card.active-version .esr-indicator,
+.version-card.in-development-version .esr-indicator {
+  background: rgb(255 255 255 / 25%);
   color: white;
+}
+
+.support-status-active {
+  background: oklch(from var(--color-supported) calc(l * 1.3) calc(c * 0.6) h);
+  color: oklch(from var(--color-supported) calc(l * 0.6) c h);
+  font-weight: 700;
 }
 
 .support-status-end-of-life {
-  background: var(--color-end-of-life);
-  color: white;
+  background: oklch(from var(--color-end-of-life) calc(l * 1.3) calc(c * 0.6) h);
+  color: oklch(from var(--color-end-of-life) calc(l * 0.7) c h);
+  font-weight: 700;
 }
 
 .support-status-in-development {
-  background: var(--color-active-development);
-  color: white;
+  background: oklch(from var(--color-active-development) calc(l * 1.3) calc(c * 0.6) h);
+  color: oklch(from var(--color-active-development) calc(l * 0.6) c h);
+  font-weight: 700;
 }
 
 .relative-date {
