@@ -7,12 +7,11 @@
   display: flex;
   gap: 2rem;
   box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-  transition: transform 0.2s ease;
+  transition: box-shadow 0.2s ease;
 }
 
 .feature-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
 }
 
 .feature-content {

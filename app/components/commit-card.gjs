@@ -127,7 +127,14 @@ export default class CommitCard extends Component {
   }
 
   <template>
-    <div class="commit-card expandable" {{on "click" this.toggleDetails}}>
+    <div
+      class="commit-card expandable"
+      style={{if
+        this.commitTypeConfig
+        (htmlSafe (concat "border-left-color: " this.commitTypeConfig.color))
+      }}
+      {{on "click" this.toggleDetails}}
+    >
       <div class="commit-header">
         <div class="commit-message">
           {{this.subjectWithLinks}}

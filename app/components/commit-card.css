@@ -11,8 +11,8 @@
   cursor: pointer;
 }
 
-.commit-card:hover {
-  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+.commit-card.expandable:hover {
+  box-shadow: 0 2px 4px rgb(0 0 0 / 15%);
 }
 
 .commit-header {
