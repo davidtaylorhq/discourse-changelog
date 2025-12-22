@@ -3,8 +3,8 @@ import { service } from '@ember/service';
 import { tracked, cached } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { on } from '@ember/modifier';
-import { fn, concat } from '@ember/helper';
-import { get } from '@ember/helper';
+import { fn, concat, get } from '@ember/helper';
+import { helper } from '@ember/component/helper';
 import { htmlSafe } from '@ember/template';
 import semver from 'semver';
 import CommitCard from './commit-card';
@@ -15,6 +15,8 @@ import {
   getCommitType,
   parseVersion,
 } from '../lib/git-utils.js';
+
+const eq = helper(([a, b]) => a === b);
 
 const COMMIT_TYPES = [
   { key: 'FEATURE', label: 'Feature', color: '#27ae60' },
@@ -33,7 +35,7 @@ const DEFAULT_END_REF = 'latest';
 
 export default class CommitViewer extends Component {
   @tracked data = new ChangelogData();
-  @tracked activeTypes = new Set();
+  @tracked activeTab = 'all';
   @tracked startAdvancedMode = false;
   @tracked endAdvancedMode = false;
   @tracked showSelectorUI = false;
@@ -138,15 +140,16 @@ export default class CommitViewer extends Component {
   get commits() {
     let filtered = this.allCommits;
 
-    // Filter by commit type - show only active types if any are selected
-    if (this.activeTypes.size > 0) {
+    // Filter by active tab
+    if (this.activeTab !== 'all') {
       filtered = filtered.filter((commit) => {
         const type = getCommitType(commit.subject) || 'OTHER';
-        return this.activeTypes.has(type);
+        return type === this.activeTab;
       });
     }
 
-    return filtered;
+    // Sort chronologically, newest first
+    return this.sortChronological(filtered, 'desc');
   }
 
   @cached
@@ -204,41 +207,13 @@ export default class CommitViewer extends Component {
   }
 
   @action
-  isTypeActive(typeKey) {
-    // If no types are active, all types are shown (return true)
-    if (this.activeTypes.size === 0) return true;
-    return this.activeTypes.has(typeKey);
-  }
-
-  @action
-  toggleCommitType(typeKey, event) {
-    const isModifierKey = event.metaKey || event.ctrlKey;
-
-    if (isModifierKey) {
-      // Mod+click: toggle this type in the active set
-      if (this.activeTypes.has(typeKey)) {
-        this.activeTypes.delete(typeKey);
-      } else {
-        this.activeTypes.add(typeKey);
-      }
-    } else {
-      // Regular click
-      if (this.activeTypes.size === 1 && this.activeTypes.has(typeKey)) {
-        // If this is the only active type, clear filter (show all)
-        this.activeTypes.clear();
-      } else {
-        // Otherwise, make this the only active type
-        this.activeTypes.clear();
-        this.activeTypes.add(typeKey);
-      }
-    }
-
-    this.activeTypes = new Set(this.activeTypes); // Trigger reactivity
-  }
-
-  @action
   toggleSelectorUI() {
     this.showSelectorUI = !this.showSelectorUI;
+  }
+
+  @action
+  setActiveTab(tab) {
+    this.activeTab = tab;
   }
 
   get formattedCommitCount() {
@@ -276,6 +251,14 @@ export default class CommitViewer extends Component {
     });
 
     return counts;
+  }
+
+  sortChronological(commits, direction) {
+    return [...commits].sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return direction === 'desc' ? dateB - dateA : dateA - dateB;
+    });
   }
 
   get displayStartRef() {
@@ -435,16 +418,24 @@ export default class CommitViewer extends Component {
         </summary>
 
         <div class="filter-section">
-          <div class="filter-pills">
+          <div class="commit-tabs">
+            <button
+              type="button"
+              class="commit-tab {{if (eq this.activeTab 'all') 'active'}}"
+              {{on "click" (fn this.setActiveTab "all")}}
+            >
+              All
+              <span class="tab-count">({{this.allCommits.length}})</span>
+            </button>
             {{#each this.commitTypes as |type|}}
               <button
                 type="button"
-                class="filter-pill {{unless (this.isTypeActive type.key) 'hidden'}}"
-                style={{htmlSafe (concat "--pill-color: " type.color)}}
-                {{on "click" (fn this.toggleCommitType type.key)}}
+                class="commit-tab {{if (eq this.activeTab type.key) 'active'}}"
+                style={{htmlSafe (concat "--tab-color: " type.color)}}
+                {{on "click" (fn this.setActiveTab type.key)}}
               >
                 {{type.label}}
-                ({{get this.commitTypeCounts type.key}})
+                <span class="tab-count">({{get this.commitTypeCounts type.key}})</span>
               </button>
             {{/each}}
           </div>

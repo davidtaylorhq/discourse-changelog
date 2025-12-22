@@ -271,36 +271,48 @@ details:not([open]) .section-header h2::before {
   color: #2c3e50;
 }
 
-.filter-pills {
+.commit-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.filter-pill {
-  padding: 0.5rem 1rem;
-  border: none;
-  background-color: var(--pill-color);
-  color: white;
-  border-radius: 4px;
+.commit-tab {
+  padding: 0.6rem 1rem;
+  border: 2px solid #e1e8ed;
+  background: white;
+  color: #5a6c7d;
+  border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
-.filter-pill:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
+.commit-tab:hover {
+  border-color: #b0b0b0;
+  background: #f8f9fa;
+}
+
+.commit-tab.active {
+  background: var(--tab-color, #3498db);
+  color: white;
+  border-color: var(--tab-color, #3498db);
+}
+
+.commit-tab.active:hover {
   opacity: 0.9;
 }
 
-.filter-pill.hidden {
-  background-color: #ecf0f1;
-  color: #95a5a6;
-  opacity: 0.7;
+.tab-count {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  font-weight: 500;
 }
 
 .commit-badge {
@@ -319,8 +331,21 @@ details:not([open]) .section-header h2::before {
   body {
     padding: 10px;
   }
-  
+
   .form-section {
     padding: 1.5rem;
+  }
+
+  .commit-tabs {
+    gap: 0.4rem;
+  }
+
+  .commit-tab {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .tab-count {
+    font-size: 0.75rem;
   }
 }
