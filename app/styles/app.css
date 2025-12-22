@@ -1,8 +1,6 @@
 /* Ember supports plain CSS out of the box. More info: https://cli.emberjs.com/release/advanced-use/stylesheets/ */
 
 :root {
-  color-scheme: light dark;
-
   /* Status colors */
   --color-active-development: #3498db;
   --color-supported: #27ae60;
@@ -16,16 +14,13 @@
   --bg-card-hover: white;
   --bg-subtle: #f8f9fa;
   --bg-code: #f8f9fa;
-
   --text-primary: #333;
   --text-secondary: #666;
   --text-muted: #7f8c8d;
-  --text-link: #0066cc;
+  --text-link: #06c;
   --text-link-hover: #0052a3;
-
   --border-color: #e1e8ed;
   --border-subtle: #f0f0f0;
-
   --shadow-sm: 0 2px 4px rgb(0 0 0 / 10%);
   --shadow-md: 0 4px 12px rgb(0 0 0 / 15%);
   --shadow-hover: 0 2px 6px rgb(0 0 0 / 12%);
@@ -38,16 +33,13 @@
     --bg-card-hover: #363636;
     --bg-subtle: #242424;
     --bg-code: #242424;
-
     --text-primary: #e0e0e0;
     --text-secondary: #b0b0b0;
     --text-muted: #888;
     --text-link: #5dade2;
     --text-link-hover: #85c1e9;
-
     --border-color: #404040;
     --border-subtle: #333;
-
     --shadow-sm: 0 2px 4px rgb(0 0 0 / 30%);
     --shadow-md: 0 4px 12px rgb(0 0 0 / 40%);
     --shadow-hover: 0 2px 6px rgb(0 0 0 / 35%);
@@ -59,13 +51,14 @@ body {
   line-height: 1.6;
   color: var(--text-primary);
   margin: 0;
-  padding: 20px;
+  padding: 0;
   background-color: var(--bg-page);
 }
 
 .commit-viewer {
   max-width: 900px;
   margin: 0 auto;
+  padding: 0 1rem 2rem;
   position: relative;
 }
 
@@ -82,7 +75,7 @@ body {
 }
 
 .back-to-versions:hover {
-  background: oklch(from var(--color-active-development) l c h / 0.1);
+  background: oklch(from var(--color-active-development) l c h / 10%);
   color: oklch(from var(--color-active-development) calc(l * 0.85) c h);
 }
 
@@ -387,10 +380,6 @@ body {
 
 /* Responsive design */
 @media (width <= 768px) {
-  body {
-    padding: 10px;
-  }
-
   .form-section {
     padding: 1.5rem;
   }

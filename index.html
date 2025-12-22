@@ -2,9 +2,13 @@
 <html lang="en-US">
   <head>
     <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline' 'self';">
     <title>DiscourseChangelog</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon" href="/logo-small-light.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="/logo-small-dark.png" media="(prefers-color-scheme: dark)">
 
     {{content-for "head"}}
 
@@ -17,12 +21,7 @@
     {{content-for "body"}}
 
     <script src="/@embroider/virtual/vendor.js"></script>
-    <script type="module">
-      import Application from './app/app';
-      import environment from './app/config/environment';
-
-      Application.create(environment.APP);
-    </script>
+    <script type="module" src="/app/start-app.js"></script>
 
     {{content-for "body-footer"}}
   </body>

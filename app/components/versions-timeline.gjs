@@ -1,4 +1,5 @@
 import Component from '@glimmer/component';
+import { htmlSafe } from '@ember/template';
 import "./versions-timeline.css";
 
 const eq = (a, b) => a === b;
@@ -57,6 +58,7 @@ export default class VersionsTimeline extends Component {
       const percent = this.dateToPercent(current, minDate, totalDays);
       months.push({
         percent,
+        style: htmlSafe(`left: ${percent}%`),
         month: current.toLocaleDateString('en-US', { month: 'short' }),
         year: current.toLocaleDateString('en-US', { year: 'numeric' })
       });
@@ -93,6 +95,9 @@ export default class VersionsTimeline extends Component {
       const supportedStartPercent = startPercent;
       const supportedWidthPercent = widthPercent;
 
+      const finalDevWidthPercent = Math.max(0, devWidthPercent);
+      const finalSupportedWidthPercent = Math.max(0, supportedWidthPercent);
+
       return {
         version: group.minorVersion,
         startPercent: devStartPercent,
@@ -101,10 +106,13 @@ export default class VersionsTimeline extends Component {
         supportedColor,
         isESR: group.supportInfo?.isESR,
         status: group.supportInfo?.status,
-        devWidthPercent: Math.max(0, devWidthPercent),
+        devWidthPercent: finalDevWidthPercent,
         supportedStartPercent,
-        supportedWidthPercent: Math.max(0, supportedWidthPercent),
-        hasPhases: devWidthPercent > 0 && supportedWidthPercent > 0
+        supportedWidthPercent: finalSupportedWidthPercent,
+        hasPhases: devWidthPercent > 0 && supportedWidthPercent > 0,
+        devStyle: htmlSafe(`left: ${devStartPercent}%; width: ${finalDevWidthPercent}%; background-color: ${devColor}`),
+        supportedStyle: htmlSafe(`left: ${supportedStartPercent}%; width: ${finalSupportedWidthPercent}%; background-color: ${supportedColor}`),
+        singleStyle: htmlSafe(`left: ${devStartPercent}%; width: ${devWidthPercent + widthPercent}%; background-color: ${supportedColor}`)
       };
     }).filter(Boolean);
 
@@ -114,7 +122,8 @@ export default class VersionsTimeline extends Component {
     return {
       months,
       bars,
-      todayPercent
+      todayPercent,
+      todayStyle: htmlSafe(`left: ${todayPercent}%`)
     };
   }
 
@@ -128,7 +137,7 @@ export default class VersionsTimeline extends Component {
               {{#each this.chartData.months as |month|}}
                 <div
                   class="timeline-month-marker"
-                  style="left: {{month.percent}}%"
+                  style={{month.style}}
                 >
                   {{month.month}}<br>{{month.year}}
                 </div>
@@ -153,17 +162,17 @@ export default class VersionsTimeline extends Component {
                       <!-- Active development phase -->
                       <div
                         class="timeline-bar timeline-bar-{{bar.status}} timeline-bar-development"
-                        style="left: {{bar.startPercent}}%; width: {{bar.devWidthPercent}}%; background-color: {{bar.devColor}}"
+                        style={{bar.devStyle}}
                       ></div>
                       <!-- Supported phase -->
                       <div
                         class="timeline-bar timeline-bar-{{bar.status}} timeline-bar-supported"
-                        style="left: {{bar.supportedStartPercent}}%; width: {{bar.supportedWidthPercent}}%; background-color: {{bar.supportedColor}}"
+                        style={{bar.supportedStyle}}
                       ></div>
                     {{else}}
                       <div
                         class="timeline-bar timeline-bar-{{bar.status}}"
-                        style="left: {{bar.startPercent}}%; width: {{bar.widthPercent}}%; background-color: {{bar.supportedColor}}"
+                        style={{bar.singleStyle}}
                       ></div>
                     {{/if}}
                   </a>
@@ -179,7 +188,7 @@ export default class VersionsTimeline extends Component {
               {{#each this.chartData.months as |month|}}
                 <div
                   class="timeline-grid-line"
-                  style="left: {{month.percent}}%"
+                  style={{month.style}}
                 ></div>
               {{/each}}
             </div>
@@ -191,7 +200,7 @@ export default class VersionsTimeline extends Component {
             <div class="timeline-today-timeline">
               <div
                 class="timeline-today-indicator"
-                style="left: {{this.chartData.todayPercent}}%"
+                style={{this.chartData.todayStyle}}
               >
                 <span class="timeline-today-label">Today</span>
                 <div class="timeline-today-line"></div>

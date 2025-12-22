@@ -284,7 +284,6 @@ export default class CommitViewer extends Component {
     <div class="commit-viewer">
       <a href="/" class="back-to-versions">← Back to Versions</a>
       <div class="header">
-        <h1>Discourse Changelog</h1>
         <div class="changelog-info">
           <p class="changelog-range">
             <strong>{{this.displayStartRef}}</strong>
