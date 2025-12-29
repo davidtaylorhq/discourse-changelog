@@ -2,9 +2,10 @@ import { readFile, writeFile, mkdir } from 'fs/promises';
 import SimpleDOM from 'simple-dom/dist/commonjs/es5/index.js';
 import { join } from 'path';
 import Module from 'node:module';
-// import { globSync } from 'glob';
 
 const require = Module.createRequire(import.meta.url);
+
+const commitsData = JSON.parse(await readFile('data/commits.json', 'utf8'));
 
 global.FastBoot = {
   require(thing) {
@@ -55,10 +56,15 @@ async function render(url, instance) {
   return new Result(bootOptions.document, wrapperHTML, {});
 }
 
+const changelogRoutes = [
+  ...Object.keys(commitsData.refs.branches).map(branch => `/changelog/${branch}`),
+  ...Object.keys(commitsData.refs.tags).map(tag => `/changelog/${tag}`)
+];
+
 const routesToPrerender = [
   '/',
   '/changelog/custom',
-  '/changelog/latest',
+  ...changelogRoutes
 ];
 
 for (let path of routesToPrerender) {
