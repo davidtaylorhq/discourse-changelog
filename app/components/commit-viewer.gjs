@@ -182,8 +182,6 @@ export default class CommitViewer extends Component {
       this.allCommits.at(-1).version?.replace(/\s*\+\d+$/, '')
     );
 
-    console.log(oldestVersion, newestVersion);
-
     // Find features that match either by hash or by version
     return this.data.newFeatures.filter((feature) => {
       const discourseVersion = feature.discourse_version;
