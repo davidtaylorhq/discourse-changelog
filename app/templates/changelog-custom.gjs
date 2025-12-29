@@ -5,9 +5,9 @@ import { pageTitle } from 'ember-page-title';
 {{pageTitle "Changelog"}}
 
 <CommitViewer
-  @start={{this.start}}
-  @end={{this.end}}
-  @onUpdateStart={{this.updateStart}}
-  @onUpdateEnd={{this.updateEnd}}
+  @start={{@controller.start}}
+  @end={{@controller.end}}
+  @onUpdateStart={{@controller.updateStart}}
+  @onUpdateEnd={{@controller.updateEnd}}
 />
 </template>
