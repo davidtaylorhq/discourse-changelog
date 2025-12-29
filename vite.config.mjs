@@ -9,6 +9,13 @@ export default defineConfig({
     minify: false,
     rollupOptions: {
       preserveEntrySignatures: "strict",
+      output: {
+        manualChunks(id) {
+          if (id.includes('/data/')) {
+            return 'data';
+          }
+        },
+      },
     }
   },
   ssr: {
