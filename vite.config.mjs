@@ -7,6 +7,9 @@ export default defineConfig({
     ssr: process.env.BUILD_SSR ? 'app/app.js' : false,
     outDir: process.env.BUILD_SSR ? 'dist-ssr' : 'dist',
     minify: false,
+    rollupOptions: {
+      preserveEntrySignatures: "strict",
+    }
   },
   ssr: {
     noExternal: true,
