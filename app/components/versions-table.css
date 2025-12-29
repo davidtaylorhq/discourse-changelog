@@ -49,7 +49,9 @@
   border-radius: 6px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
   scroll-margin-top: 20px;
 }
 

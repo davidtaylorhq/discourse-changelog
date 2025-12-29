@@ -1,51 +1,34 @@
-import Component from '@glimmer/component';
-import { service } from '@ember/service';
-import { tracked, cached } from '@glimmer/tracking';
-import { action } from '@ember/object';
-import { on } from '@ember/modifier';
-import { fn, concat, get } from '@ember/helper';
-import { helper } from '@ember/component/helper';
-import { htmlSafe } from '@ember/template';
-import semver from 'semver';
-import CommitCard from './commit-card';
-import FeatureCard from './feature-card';
-import VerticalCollection from '@html-next/vertical-collection/components/vertical-collection/component';
+import Component from "@glimmer/component";
+import { cached, tracked } from "@glimmer/tracking";
+import { helper } from "@ember/component/helper";
+import { concat, fn, get } from "@ember/helper";
+import { on } from "@ember/modifier";
+import { action } from "@ember/object";
+import { htmlSafe } from "@ember/template";
+import VerticalCollection from "@html-next/vertical-collection/components/vertical-collection/component";
+import semver from "semver";
+import config from "discourse-changelog/config/environment";
 import {
   ChangelogData,
+  COMMIT_TYPES,
   getCommitType,
   parseVersion,
-  COMMIT_TYPES
-} from '../lib/git-utils.js';
-import config from 'discourse-changelog/config/environment';
+} from "../lib/git-utils.js";
+import CommitCard from "./commit-card";
+import FeatureCard from "./feature-card";
 
 const eq = helper(([a, b]) => a === b);
 
-const DEFAULT_START_REF = 'v2025.11.0';
-const DEFAULT_END_REF = 'latest';
+const DEFAULT_START_REF = "v2025.11.0";
+const DEFAULT_END_REF = "latest";
 
 export default class CommitViewer extends Component {
   @tracked data = new ChangelogData();
-  @tracked activeTab = 'all';
-  @tracked filterText = '';
+  @tracked activeTab = "all";
+  @tracked filterText = "";
   @tracked startAdvancedMode = false;
   @tracked endAdvancedMode = false;
   @tracked showSelectorUI = false;
-
-  async loadData() {
-    try {
-      await this.data.load();
-    } catch (error) {
-      console.error('Failed to load data:', error);
-    }
-  }
-
-  get startHash() {
-    return this.args.start || '';
-  }
-
-  get endHash() {
-    return this.args.end || '';
-  }
 
   isStartSelected = (value) => {
     if (this.startHash) {
@@ -67,6 +50,14 @@ export default class CommitViewer extends Component {
     }
     return value === DEFAULT_END_REF;
   };
+
+  get startHash() {
+    return this.args.start || "";
+  }
+
+  get endHash() {
+    return this.args.end || "";
+  }
 
   @action
   updateStartHash(event) {
@@ -108,7 +99,9 @@ export default class CommitViewer extends Component {
 
   @cached
   get allCommits() {
-    if (!this.data.commitData) return [];
+    if (!this.data.commitData) {
+      return [];
+    }
 
     const endRef = this.endHash.trim() || DEFAULT_END_REF;
 
@@ -127,9 +120,9 @@ export default class CommitViewer extends Component {
     let filtered = this.allCommits;
 
     // Filter by active tab
-    if (this.activeTab !== 'all') {
+    if (this.activeTab !== "all") {
       filtered = filtered.filter((commit) => {
-        const type = getCommitType(commit.subject) || 'OTHER';
+        const type = getCommitType(commit.subject) || "OTHER";
         return type === this.activeTab;
       });
     }
@@ -143,12 +136,14 @@ export default class CommitViewer extends Component {
     }
 
     // Sort chronologically, newest first
-    return this.sortChronological(filtered, 'desc');
+    return this.sortChronological(filtered, "desc");
   }
 
   @cached
   get error() {
-    if (!this.data.commitData) return null;
+    if (!this.data.commitData) {
+      return null;
+    }
 
     // If user has specified custom refs and we got no commits, show error
     if (this.commits.length === 0) {
@@ -173,17 +168,19 @@ export default class CommitViewer extends Component {
     const commitHashes = new Set(this.allCommits.map((c) => c.hash));
 
     const newestVersion = parseVersion(
-      this.allCommits[0].version?.replace(/\s*\+\d+$/, '')
+      this.allCommits[0].version?.replace(/\s*\+\d+$/, "")
     );
 
     const oldestVersion = parseVersion(
-      this.allCommits.at(-1).version?.replace(/\s*\+\d+$/, '')
+      this.allCommits.at(-1).version?.replace(/\s*\+\d+$/, "")
     );
 
     // Find features that match either by hash or by version
     return this.data.newFeatures.filter((feature) => {
       const discourseVersion = feature.discourse_version;
-      if (!discourseVersion) return false;
+      if (!discourseVersion) {
+        return false;
+      }
 
       if (discourseVersion.match(/\d+\.\d+\.\d+/)) {
         const parsedVersion = parseVersion(discourseVersion);
@@ -215,7 +212,7 @@ export default class CommitViewer extends Component {
 
   get formattedCommitCount() {
     return this.commits.length === 1
-      ? '1 commit'
+      ? "1 commit"
       : `${this.commits.length} commits`;
   }
 
@@ -243,7 +240,7 @@ export default class CommitViewer extends Component {
       if (type && counts[type] !== undefined) {
         counts[type]++;
       } else if (!type) {
-        counts['OTHER']++;
+        counts["OTHER"]++;
       }
     });
 
@@ -254,12 +251,14 @@ export default class CommitViewer extends Component {
     return [...commits].sort((a, b) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
-      return direction === 'desc' ? dateB - dateA : dateA - dateB;
+      return direction === "desc" ? dateB - dateA : dateA - dateB;
     });
   }
 
   get displayStartRef() {
-    if (!this.data.commitData) return '';
+    if (!this.data.commitData) {
+      return "";
+    }
     const endRef = this.endHash.trim() || DEFAULT_END_REF;
     let startRef = this.startHash.trim();
     if (!startRef) {
@@ -274,7 +273,7 @@ export default class CommitViewer extends Component {
 
   get bufferSize() {
     // In test mode, render all commits to avoid flaky tests
-    return config.environment === 'test' ? 9999 : 5;
+    return config.environment === "test" ? 9999 : 5;
   }
 
   <template>
@@ -436,7 +435,10 @@ export default class CommitViewer extends Component {
                 {{on "click" (fn this.setActiveTab type.key)}}
               >
                 {{type.label}}
-                <span class="tab-count">({{get this.commitTypeCounts type.key}})</span>
+                <span class="tab-count">({{get
+                    this.commitTypeCounts
+                    type.key
+                  }})</span>
               </button>
             {{/each}}
           </div>

@@ -1,8 +1,7 @@
-import { tracked } from '@glimmer/tracking';
-import semver from 'semver';
-import NewFeaturesData from "/data/new-features.json";
+import { tracked } from "@glimmer/tracking";
 import CommitsData from "/data/commits.json";
-
+import NewFeaturesData from "/data/new-features.json";
+import semver from "semver";
 
 export class ChangelogData {
   @tracked commitData = CommitsData;
@@ -10,7 +9,7 @@ export class ChangelogData {
   @tracked isLoading = false;
 
   get baseTag() {
-    return this.commitData?.baseTag || '';
+    return this.commitData?.baseTag || "";
   }
 
   get totalCommits() {
@@ -18,7 +17,9 @@ export class ChangelogData {
   }
 
   get branches() {
-    if (!this.commitData) return [];
+    if (!this.commitData) {
+      return [];
+    }
     return Object.keys(this.commitData.refs.branches).map((branch) => ({
       value: branch,
       label: branch,
@@ -26,7 +27,9 @@ export class ChangelogData {
   }
 
   get sortedTags() {
-    if (!this.commitData) return [];
+    if (!this.commitData) {
+      return [];
+    }
 
     // Sort tags in descending order
     const tags = Object.keys(this.commitData.refs.tags).sort((a, b) => {
@@ -48,18 +51,20 @@ export class ChangelogData {
   }
 
   get sortedRefs() {
-    if (!this.commitData) return [];
+    if (!this.commitData) {
+      return [];
+    }
 
     const refs = [];
 
     // Add branches first
     this.branches.forEach((branch) => {
-      refs.push({ ...branch, type: 'branch' });
+      refs.push({ ...branch, type: "branch" });
     });
 
     // Add tags
     this.sortedTags.forEach((tag) => {
-      refs.push({ ...tag, type: 'tag' });
+      refs.push({ ...tag, type: "tag" });
     });
 
     return refs;
@@ -68,7 +73,9 @@ export class ChangelogData {
   // Get the previous version tag from a given ref
   // Traverses git history to find the most recent tag in the parent commits
   getPreviousVersion(ref) {
-    if (!this.commitData) return null;
+    if (!this.commitData) {
+      return null;
+    }
 
     // Resolve the ref to a commit hash
     const commitHash = this.resolveRef(ref);
@@ -107,7 +114,9 @@ export class ChangelogData {
 
   // Resolve a ref (tag/branch/hash) to a commit hash
   resolveRef(ref) {
-    if (!this.commitData) return ref;
+    if (!this.commitData) {
+      return ref;
+    }
 
     // Check if it's a tag
     if (this.commitData.refs.tags[ref]) {
@@ -133,7 +142,9 @@ export class ChangelogData {
 
   // Iterative traversal to find all commits reachable from a given commit
   traverseParents(commitHash) {
-    if (!this.commitData) return new Set();
+    if (!this.commitData) {
+      return new Set();
+    }
 
     const visited = new Set();
     const queue = [commitHash];
@@ -168,7 +179,9 @@ export class ChangelogData {
 
   // Get commits between two refs
   getCommitsBetween(startRef, endRef) {
-    if (!this.commitData) return [];
+    if (!this.commitData) {
+      return [];
+    }
 
     // Resolve refs to commit hashes
     const startHash = this.resolveRef(startRef);
@@ -195,7 +208,7 @@ export class ChangelogData {
 // Normalize version tags to proper semver format
 // v3.5.0.beta1 -> v3.5.0-beta.1
 export function normalizeVersion(version) {
-  return version.replace(/\.beta(\d+)$/, '-beta.$1');
+  return version.replace(/\.beta(\d+)$/, "-beta.$1");
 }
 
 // Parse a version string to a semver object, handling beta notation
@@ -205,16 +218,21 @@ export function parseVersion(version) {
 }
 
 export const COMMIT_TYPES = [
-  { key: 'FEATURE', label: 'Feature', color: '#27ae60', prefix: 'FEATURE' },
-  { key: 'FIX', label: 'Fix', color: '#c0392b', prefix: 'FIX' },
-  { key: 'PERF', label: 'Performance', color: '#8e44ad', prefix: 'PERF' },
-  { key: 'UX', label: 'UX', color: '#2980b9', prefix: 'UX' },
-  { key: 'A11Y', label: 'Accessibility', color: '#16a085', prefix: 'A11Y' },
-  { key: 'SECURITY', label: 'Security', color: '#d35400', prefix: 'SECURITY' },
-  { key: 'TRANSLATIONS', label: 'Translations', color: '#e91e63', prefix: 'I18N' },
-  { key: 'DEV', label: 'Dev', color: '#7f8c8d', prefix: 'DEV' },
-  { key: 'DEPS', label: 'Dependencies', color: '#7f8c8d', prefix: 'DEPS' },
-  { key: 'OTHER', label: 'Other', color: '#95a5a6' },
+  { key: "FEATURE", label: "Feature", color: "#27ae60", prefix: "FEATURE" },
+  { key: "FIX", label: "Fix", color: "#c0392b", prefix: "FIX" },
+  { key: "PERF", label: "Performance", color: "#8e44ad", prefix: "PERF" },
+  { key: "UX", label: "UX", color: "#2980b9", prefix: "UX" },
+  { key: "A11Y", label: "Accessibility", color: "#16a085", prefix: "A11Y" },
+  { key: "SECURITY", label: "Security", color: "#d35400", prefix: "SECURITY" },
+  {
+    key: "TRANSLATIONS",
+    label: "Translations",
+    color: "#e91e63",
+    prefix: "I18N",
+  },
+  { key: "DEV", label: "Dev", color: "#7f8c8d", prefix: "DEV" },
+  { key: "DEPS", label: "Dependencies", color: "#7f8c8d", prefix: "DEPS" },
+  { key: "OTHER", label: "Other", color: "#95a5a6" },
 ];
 
 // Extract commit type from subject
@@ -228,8 +246,12 @@ export function getCommitType(subject) {
   }
 
   // Handle legacy formats
-  if (subject.startsWith('Update translations')) return 'TRANSLATIONS';
-  if (subject.startsWith('Build(deps')) return 'DEPS';
+  if (subject.startsWith("Update translations")) {
+    return "TRANSLATIONS";
+  }
+  if (subject.startsWith("Build(deps")) {
+    return "DEPS";
+  }
 
-  return 'OTHER';
+  return "OTHER";
 }

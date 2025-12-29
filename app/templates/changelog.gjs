@@ -1,18 +1,22 @@
+import { concat } from "@ember/helper";
+import { pageTitle } from "ember-page-title";
 import CommitViewer from "../components/commit-viewer";
-import { pageTitle } from 'ember-page-title';
-import metaDescription from '../helpers/meta-description';
-import { concat } from '@ember/helper';
+import metaDescription from "../helpers/meta-description";
 
 <template>
-{{pageTitle (concat "'" @controller.end "' Changelog")}}
-{{metaDescription (concat "Featured changes and detailed commit history for Discourse '" @controller.end "'.")}}
+  {{pageTitle (concat "'" @controller.end "' Changelog")}}
+  {{metaDescription
+    (concat
+      "Featured changes and detailed commit history for Discourse '"
+      @controller.end
+      "'."
+    )
+  }}
 
-<CommitViewer
-  @start={{@controller.start}}
-  @end={{@controller.end}}
-  @onUpdateStart={{@controller.updateStart}}
-  @onUpdateEnd={{@controller.updateEnd}}
-/>
+  <CommitViewer
+    @start={{@controller.start}}
+    @end={{@controller.end}}
+    @onUpdateStart={{@controller.updateStart}}
+    @onUpdateEnd={{@controller.updateEnd}}
+  />
 </template>
-
-

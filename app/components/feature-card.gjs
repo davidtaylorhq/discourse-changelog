@@ -1,14 +1,16 @@
-import Component from '@glimmer/component';
-import './feature-card.css';
+import Component from "@glimmer/component";
+import "./feature-card.css";
 
 export default class FeatureCard extends Component {
   get formattedDate() {
-    if (!this.args.feature.released_at) return null;
+    if (!this.args.feature.released_at) {
+      return null;
+    }
     const date = new Date(this.args.feature.released_at);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   }
 
@@ -18,14 +20,18 @@ export default class FeatureCard extends Component {
 
   get screenshotUrl() {
     const url = this.args.feature.screenshot_url;
-    if (!url) return null;
+    if (!url) {
+      return null;
+    }
     // Handle protocol-relative URLs
-    return url.startsWith('//') ? `https:${url}` : url;
+    return url.startsWith("//") ? `https:${url}` : url;
   }
 
   get versionInfo() {
     const version = this.args.feature.discourse_version;
-    if (!version) return null;
+    if (!version) {
+      return null;
+    }
 
     // If it's a full commit hash (40 characters), show shortened version
     if (version.length === 40) {

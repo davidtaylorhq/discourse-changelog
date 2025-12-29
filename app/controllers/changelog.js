@@ -1,6 +1,6 @@
-import Controller from '@ember/controller';
-import { action } from '@ember/object';
-import { service } from '@ember/service';
+import Controller from "@ember/controller";
+import { action } from "@ember/object";
+import { service } from "@ember/service";
 
 export default class ChangelogController extends Controller {
   @service router;
@@ -16,8 +16,8 @@ export default class ChangelogController extends Controller {
   @action
   updateStart(value) {
     // If a start value is provided, always go to custom route
-    this.router.transitionTo('changelog-custom', {
-      queryParams: { start: value, end: this.end }
+    this.router.transitionTo("changelog-custom", {
+      queryParams: { start: value, end: this.end },
     });
   }
 
@@ -25,12 +25,12 @@ export default class ChangelogController extends Controller {
   updateEnd(value) {
     if (this.start) {
       // If we have a start, go to custom route
-      this.router.transitionTo('changelog-custom', {
-        queryParams: { start: this.start, end: value }
+      this.router.transitionTo("changelog-custom", {
+        queryParams: { start: this.start, end: value },
       });
     } else {
       // Otherwise use the standard changelog route
-      this.router.transitionTo('changelog', value);
+      this.router.transitionTo("changelog", value);
     }
   }
 }

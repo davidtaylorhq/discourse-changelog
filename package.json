@@ -87,6 +87,7 @@
   },
   "dependencies": {
     "@discourse/lint-configs": "^2.36.0",
+    "@eslint/compat": "^2.0.0",
     "@glint/ember-tsc": "^1.0.8",
     "@html-next/vertical-collection": "^4.0.2",
     "@isomorphic-git/lightning-fs": "^4.6.2",

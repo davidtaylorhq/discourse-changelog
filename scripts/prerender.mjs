@@ -1,26 +1,23 @@
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import { JSDOM } from 'jsdom';
-import Module from 'node:module';
+// eslint-disable no-console
 
-const require = Module.createRequire(import.meta.url);
-
-const commitsData = JSON.parse(await readFile('data/commits.json', 'utf8'));
-
-import { dirname } from 'node:path';
+import { mkdir, readFile, writeFile } from "fs/promises";
+import { JSDOM } from "jsdom";
+import commitsData from "../data/commits.json" assert { type: "json" };
+import { dirname } from "node:path";
 
 globalThis.window = globalThis;
 
-const { default: App } = await import('../dist-ssr/app.mjs');
-const wrapperHTML = await readFile('dist/index.html', 'utf8');
+const { default: App } = await import("../dist-ssr/app.mjs");
+const wrapperHTML = await readFile("dist/index.html", "utf8");
 
 let instance = App.create({
   autoboot: false,
-  modulePrefix: 'discourse-changelog',
+  modulePrefix: "discourse-changelog",
 });
 
 async function preRender(path, output) {
   try {
-    const result = await render(path, instance);
+    const result = await render(path);
     await mkdir(dirname(output), { recursive: true });
     await writeFile(output, result);
   } catch (e) {
@@ -34,12 +31,12 @@ function buildBootOptions() {
   return {
     isBrowser: false,
     jsdom: dom,
-    rootElement: dom.window.document.querySelector('#main-outlet'),
+    rootElement: dom.window.document.querySelector("#main-outlet"),
     shouldRender: true,
   };
 }
 
-async function render(url, instance) {
+async function render(url) {
   let bootOptions = buildBootOptions();
   globalThis.document = bootOptions.jsdom.window.document;
   await instance.visit(url, bootOptions);
@@ -47,17 +44,15 @@ async function render(url, instance) {
 }
 
 const changelogRoutes = [
-  ...Object.keys(commitsData.refs.branches).map(branch => `/changelog/${branch}`),
-  ...Object.keys(commitsData.refs.tags).map(tag => `/changelog/${tag}`)
+  ...Object.keys(commitsData.refs.branches).map(
+    (branch) => `/changelog/${branch}`
+  ),
+  ...Object.keys(commitsData.refs.tags).map((tag) => `/changelog/${tag}`),
 ];
 
-const routesToPrerender = [
-  '/',
-  '/changelog/custom',
-  ...changelogRoutes,
-];
+const routesToPrerender = ["/", "/changelog/custom", ...changelogRoutes];
 
 for (let path of routesToPrerender) {
   await preRender(path, `dist${path}/index.html`);
 }
-await preRender('/404', `dist/404.html`);
+await preRender("/404", `dist/404.html`);

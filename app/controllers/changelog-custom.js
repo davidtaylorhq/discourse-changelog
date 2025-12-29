@@ -1,12 +1,11 @@
-import Controller from '@ember/controller';
-import { tracked } from '@glimmer/tracking';
-import { action } from '@ember/object';
+import { tracked } from "@glimmer/tracking";
+import Controller from "@ember/controller";
+import { action } from "@ember/object";
 
 export default class ChangelogCustomController extends Controller {
-  queryParams = ['start', 'end'];
-
   @tracked start = null;
   @tracked end = null;
+  queryParams = ["start", "end"];
 
   @action
   updateStart(value) {

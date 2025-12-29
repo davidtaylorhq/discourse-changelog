@@ -1,6 +1,5 @@
-
 export default {
-  initialize(instance){
+  initialize(instance) {
     window.DiscourseChangelog = instance;
-  }
-}
+  },
+};

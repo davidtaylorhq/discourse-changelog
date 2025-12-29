@@ -1,10 +1,7 @@
-import Route from '@ember/routing/route';
-import { service } from '@ember/service';
-import CommitsData from '/data/commits.json';
+import Route from "@ember/routing/route";
+import CommitsData from "/data/commits.json";
 
 export default class ChangelogRoute extends Route {
-  @service router;
-
   beforeModel(transition) {
     const end = transition.to.params.end;
 
@@ -17,7 +14,7 @@ export default class ChangelogRoute extends Route {
     const isValidTag = CommitsData.refs.tags[end] !== undefined;
 
     if (!isValidBranch && !isValidTag) {
-      throw new Error('Not Found');
+      throw new Error("Not Found");
     }
   }
 

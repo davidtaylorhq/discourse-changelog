@@ -1,6 +1,5 @@
-/* eslint-disable ember/no-runloop */
-import { schedule, next,  cancel } from "@ember/runloop";
-import { modifier } from 'ember-modifier';
+import { cancel, next } from "@ember/runloop";
+import { modifier } from "ember-modifier";
 
 // Global registry of highlights by ID
 const highlightRegistry = new Map();
@@ -31,7 +30,7 @@ function addHighlightRanges(id, ranges) {
 
 function removeHighlightRanges(id, ranges) {
   const highlightSet = getOrCreateHighlightSet(id);
-  for(const range of ranges) {
+  for (const range of ranges) {
     highlightSet.delete(range);
   }
   rerenderHighlights(id);
@@ -51,13 +50,13 @@ export default modifier((element, _positional, { searchString, id }) => {
   // Annoyingly, Ember's timing when **re-**rendering modifiers is not
   // quite right. It calls the modifier again before the DOM is updated.
   // Work around this by scheduling the highlight work in the next tick.
-  const scheduled = next(() => { 
+  const scheduled = next(() => {
     performHighlight(searchString, element, ranges);
 
-    if(ranges.length){
+    if (ranges.length) {
       addHighlightRanges(id, ranges);
     }
-  })
+  });
 
   return () => {
     cancel(scheduled);
@@ -68,28 +67,26 @@ export default modifier((element, _positional, { searchString, id }) => {
 function performHighlight(searchString, element, ranges) {
   const term = searchString.toLowerCase();
 
-    const walker = document.createTreeWalker(
-      element,
-      NodeFilter.SHOW_TEXT,
-      null
-    );
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null);
 
-    let node;
-    while ((node = walker.nextNode())) {
-      const text = node.textContent.toLowerCase();
-      let startPos = 0;
+  let node;
+  while ((node = walker.nextNode())) {
+    const text = node.textContent.toLowerCase();
+    let startPos = 0;
 
-      // Find all occurrences in this text node
-      while (true) {
-        const index = text.indexOf(term, startPos);
-        if (index === -1) break;
-
-        const range = new Range();
-        range.setStart(node, index);
-        range.setEnd(node, index + term.length);
-        ranges.push(range);
-
-        startPos = index + term.length;
+    // Find all occurrences in this text node
+    while (true) {
+      const index = text.indexOf(term, startPos);
+      if (index === -1) {
+        break;
       }
+
+      const range = new Range();
+      range.setStart(node, index);
+      range.setEnd(node, index + term.length);
+      ranges.push(range);
+
+      startPos = index + term.length;
     }
+  }
 }

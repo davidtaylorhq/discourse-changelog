@@ -1,22 +1,23 @@
-import Component from '@glimmer/component';
-import { tracked } from '@glimmer/tracking';
-import { ChangelogData } from '../lib/git-utils.js';
-import semver from 'semver';
-import VersionsTimeline from './versions-timeline.gjs';
-import './versions-table.css';
-import { service } from '@ember/service';
-import VersionSupport from '/data/version-support.json';
+import Component from "@glimmer/component";
+import { tracked } from "@glimmer/tracking";
 import { LinkTo } from "@ember/routing";
+import "./versions-table.css";
+import VersionSupport from "/data/version-support.json";
+import semver from "semver";
+import { ChangelogData } from "../lib/git-utils.js";
+import VersionsTimeline from "./versions-timeline.gjs";
 
 const eq = (a, b) => a === b;
 
 export default class VersionsTable extends Component {
   @tracked data = new ChangelogData();
+
   @tracked versionSupport = [];
-  @service fastboot;
 
   get versions() {
-    if (!this.data.commitData) return [];
+    if (!this.data.commitData) {
+      return [];
+    }
 
     // Get all tags and their commit info
     const versions = [];
@@ -24,10 +25,14 @@ export default class VersionsTable extends Component {
       this.data.commitData.refs.tags
     )) {
       // Skip tags ending with -latest
-      if (tagName.endsWith('-latest')) continue;
+      if (tagName.endsWith("-latest")) {
+        continue;
+      }
 
       // Skip beta versions
-      if (tagName.includes('beta')) continue;
+      if (tagName.includes("beta")) {
+        continue;
+      }
 
       const commit = this.data.commitData.commits[tagHash];
       if (commit) {
@@ -54,18 +59,25 @@ export default class VersionsTable extends Component {
       const displayMatch = supportEntry.version.match(/v?(\d+\.\d+)/);
       const displayMinorKey = displayMatch ? displayMatch[1] : null;
 
-      if (!displayMinorKey) return;
+      if (!displayMinorKey) {
+        return;
+      }
 
       // Normalize version for semver parsing
       // Add .0 patch version if not present, and remove leading zeros in minor
-      let normalizedVersion = supportEntry.version.replace(/^v/, ''); // Remove v prefix
-      if (!/\.\d+$/.test(normalizedVersion) || normalizedVersion.split('.').length === 2) {
-        normalizedVersion += '.0'; // Add .0 patch version
+      let normalizedVersion = supportEntry.version.replace(/^v/, ""); // Remove v prefix
+      if (
+        !/\.\d+$/.test(normalizedVersion) ||
+        normalizedVersion.split(".").length === 2
+      ) {
+        normalizedVersion += ".0"; // Add .0 patch version
       }
-      normalizedVersion = normalizedVersion.replace(/\.0(\d)/, '.$1'); // Remove leading zeros
+      normalizedVersion = normalizedVersion.replace(/\.0(\d)/, ".$1"); // Remove leading zeros
       const parsed = semver.coerce(normalizedVersion);
 
-      if (!parsed) return;
+      if (!parsed) {
+        return;
+      }
 
       const group = {
         minorVersion: displayMinorKey,
@@ -75,7 +87,10 @@ export default class VersionsTable extends Component {
       };
 
       // If this is an upcoming or in-development version, just add the placeholder
-      if (supportEntry.status === 'upcoming' || supportEntry.status === 'in-development') {
+      if (
+        supportEntry.status === "upcoming" ||
+        supportEntry.status === "in-development"
+      ) {
         group.versions.push({
           version: supportEntry.version,
           date: supportEntry.releaseDate,
@@ -89,9 +104,13 @@ export default class VersionsTable extends Component {
         const gitVersions = this.versions;
         const matchingVersions = gitVersions.filter((v) => {
           const vParsed = semver.coerce(v.version);
-          if (!vParsed) return false;
+          if (!vParsed) {
+            return false;
+          }
           // Match major.minor
-          return vParsed.major === parsed.major && vParsed.minor === parsed.minor;
+          return (
+            vParsed.major === parsed.major && vParsed.minor === parsed.minor
+          );
         });
 
         // Add all matching versions
@@ -122,7 +141,7 @@ export default class VersionsTable extends Component {
         if (group.headerVersion && supportEntry.releaseDate) {
           group.headerVersion = {
             ...group.headerVersion,
-            date: supportEntry.releaseDate
+            date: supportEntry.releaseDate,
           };
         }
       }
@@ -139,20 +158,20 @@ export default class VersionsTable extends Component {
   formatDate(isoString) {
     // Check if it's yyyy-mm format (no day)
     if (/^\d{4}-\d{2}$/.test(isoString)) {
-      const [year, month] = isoString.split('-');
-      const date = new Date(year, parseInt(month) - 1, 1);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long'
+      const [year, month] = isoString.split("-");
+      const date = new Date(year, parseInt(month, 10) - 1, 1);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
       });
     }
 
     // Otherwise it's yyyy-mm-dd format
     const date = new Date(isoString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   }
 
@@ -163,18 +182,18 @@ export default class VersionsTable extends Component {
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
     if (diffInDays === 0) {
-      return 'today';
+      return "today";
     } else if (diffInDays === 1) {
-      return '1 day ago';
+      return "1 day ago";
     } else if (diffInDays < 30) {
       return `${diffInDays} days ago`;
     } else if (diffInDays < 60) {
-      return '1 month ago';
+      return "1 month ago";
     } else if (diffInDays < 365) {
       const months = Math.floor(diffInDays / 30);
       return `${months} months ago`;
     } else if (diffInDays < 730) {
-      return '1 year ago';
+      return "1 year ago";
     } else {
       const years = Math.floor(diffInDays / 365);
       return `${years} years ago`;
@@ -182,7 +201,9 @@ export default class VersionsTable extends Component {
   }
 
   isPlannedDate(isoString) {
-    if (!isoString) return false;
+    if (!isoString) {
+      return false;
+    }
 
     // If it's yyyy-mm format (imprecise), always consider it "planned"
     if (/^\d{4}-\d{2}$/.test(isoString)) {
@@ -203,11 +224,17 @@ export default class VersionsTable extends Component {
       {{else}}
         <div class="version-info">
           <p>
-            Discourse releases new versions every month, which are supported with critical bug fixes and security updates for approximately two months.
-            Every 6 months, one of those releases is designated as an Extended Support Release (ESR) version. This will be supported for approximately 8 months, providing an option for users who prefer less frequent updates.
+            Discourse releases new versions every month, which are supported
+            with critical bug fixes and security updates for approximately two
+            months. Every 6 months, one of those releases is designated as an
+            Extended Support Release (ESR) version. This will be supported for
+            approximately 8 months, providing an option for users who prefer
+            less frequent updates.
           </p>
           <p>
-            Below is a timeline and list of Discourse versions, their release dates, end-of-life dates, and support status. Click on a version to view its changelog.
+            Below is a timeline and list of Discourse versions, their release
+            dates, end-of-life dates, and support status. Click on a version to
+            view its changelog.
           </p>
         </div>
 
@@ -215,21 +242,45 @@ export default class VersionsTable extends Component {
 
         <div class="versions-cards">
           {{#each this.groupedVersions as |group|}}
-            <div id="version-{{group.minorVersion}}" class="version-card {{if (eq group.supportInfo.status 'upcoming') 'upcoming-version'}} {{if (eq group.supportInfo.status 'in-development') 'in-development-version'}} {{if (eq group.supportInfo.status 'active') 'active-version'}} {{if (eq group.supportInfo.status 'end-of-life') 'eol-version'}} {{if group.supportInfo.isESR 'esr-version'}}">
+            <div
+              id="version-{{group.minorVersion}}"
+              class="version-card
+                {{if
+                  (eq group.supportInfo.status 'upcoming')
+                  'upcoming-version'
+                }}
+                {{if
+                  (eq group.supportInfo.status 'in-development')
+                  'in-development-version'
+                }}
+                {{if (eq group.supportInfo.status 'active') 'active-version'}}
+                {{if (eq group.supportInfo.status 'end-of-life') 'eol-version'}}
+                {{if group.supportInfo.isESR 'esr-version'}}"
+            >
               <div class="card-header">
                 <div class="version-title">
                   {{#if (eq group.supportInfo.status "in-development")}}
-                    <LinkTo @route="changelog" @model="latest" class="version-link">v{{group.minorVersion}}</LinkTo>
+                    <LinkTo
+                      @route="changelog"
+                      @model="latest"
+                      class="version-link"
+                    >v{{group.minorVersion}}</LinkTo>
                   {{else if (eq group.supportInfo.status "upcoming")}}
                     <span class="version-name">v{{group.minorVersion}}</span>
                   {{else}}
-                    <LinkTo @route="changelog" @model={{group.headerVersion.version}} class="version-link">v{{group.minorVersion}}</LinkTo>
+                    <LinkTo
+                      @route="changelog"
+                      @model={{group.headerVersion.version}}
+                      class="version-link"
+                    >v{{group.minorVersion}}</LinkTo>
                   {{/if}}
                   {{#if group.supportInfo.isESR}}
                     <span class="esr-indicator">ESR</span>
                   {{/if}}
                 </div>
-                <div class="status-badge support-status-{{group.supportInfo.status}}">
+                <div
+                  class="status-badge support-status-{{group.supportInfo.status}}"
+                >
                   {{#if (eq group.supportInfo.status "in-development")}}
                     Active development
                   {{else if (eq group.supportInfo.status "active")}}
@@ -253,13 +304,19 @@ export default class VersionsTable extends Component {
                   </div>
                   <div class="card-value">
                     {{#if (eq group.supportInfo.status "in-development")}}
-                      <span class="upcoming-date">{{this.formatDate group.headerVersion.date}}</span>
+                      <span class="upcoming-date">{{this.formatDate
+                          group.headerVersion.date
+                        }}</span>
                     {{else if (eq group.supportInfo.status "upcoming")}}
-                      <span class="upcoming-date">{{this.formatDate group.headerVersion.date}}</span>
+                      <span class="upcoming-date">{{this.formatDate
+                          group.headerVersion.date
+                        }}</span>
                     {{else}}
                       <span class="relative-date">
                         {{this.getRelativeTime group.headerVersion.date}}
-                        <span class="date-badge">{{this.formatDate group.headerVersion.date}}</span>
+                        <span class="date-badge">{{this.formatDate
+                            group.headerVersion.date
+                          }}</span>
                       </span>
                     {{/if}}
                   </div>
@@ -267,7 +324,9 @@ export default class VersionsTable extends Component {
 
                 <div class="card-row">
                   <div class="card-label">
-                    {{#if (this.isPlannedDate group.supportInfo.supportEndDate)}}
+                    {{#if
+                      (this.isPlannedDate group.supportInfo.supportEndDate)
+                    }}
                       Planned end of life
                     {{else}}
                       End of Life
@@ -288,10 +347,16 @@ export default class VersionsTable extends Component {
                   <div class="patch-versions">
                     {{#each group.versions as |v|}}
                       <div class="patch-version-row">
-                        <LinkTo @route="changelog" @model={{v.version}} class="patch-version-link">{{v.version}}</LinkTo>
+                        <LinkTo
+                          @route="changelog"
+                          @model={{v.version}}
+                          class="patch-version-link"
+                        >{{v.version}}</LinkTo>
                         <span class="relative-date">
                           {{this.getRelativeTime v.date}}
-                          <span class="date-badge">{{this.formatDate v.date}}</span>
+                          <span class="date-badge">{{this.formatDate
+                              v.date
+                            }}</span>
                         </span>
                       </div>
                     {{/each}}

@@ -1,5 +1,6 @@
 .feature-card {
-  background: linear-gradient(135deg,
+  background: linear-gradient(
+    135deg,
     light-dark(#667eea, #4a5fc1) 0%,
     light-dark(#764ba2, #5d3a82) 100%
   );

@@ -29,6 +29,7 @@ The application requires data files to be generated from the Discourse repositor
 - `pnpm build:data` - Generate commits.json and new-features.json
 
 This will:
+
 1. Clone the Discourse repository to `tmp/discourse-repo`
 2. Extract commit information and generate `data/commits.json`
 3. Fetch new features from meta.discourse.org to `data/new-features.json`

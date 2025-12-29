@@ -1,5 +1,5 @@
-import { pageTitle } from 'ember-page-title';
-import './error.css';
+import "./error.css";
+import { pageTitle } from "ember-page-title";
 
 <template>
   {{pageTitle "Page Not Found"}}
