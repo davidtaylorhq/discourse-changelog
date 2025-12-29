@@ -1,9 +1,9 @@
-// eslint-disable no-console
+/* eslint-disable no-console */
 
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { JSDOM } from "jsdom";
-import commitsData from "../data/commits.json" with { type: "json" };
 import { dirname } from "node:path";
+import commitsData from "../data/commits.json" with { type: "json" };
 
 globalThis.window = globalThis;
 

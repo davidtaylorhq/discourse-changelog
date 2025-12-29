@@ -109,6 +109,11 @@ export default class CommitCard extends Component {
   }
 
   @action
+  stopPropagation(event) {
+    event.stopPropagation();
+  }
+
+  @action
   toggleDetails(event) {
     // Don't toggle if clicking on a link
     if (event.target.tagName === "A" || event.target.closest("a")) {
@@ -158,7 +163,7 @@ export default class CommitCard extends Component {
             rel="noopener noreferrer"
             class="commit-sha"
             title="Open on GitHub"
-            onclick="event.stopPropagation()"
+            {{on "click" this.stopPropagation}}
           >
             {{this.shortHash}}
           </a>
@@ -176,7 +181,7 @@ export default class CommitCard extends Component {
             rel="noopener noreferrer"
             class="commit-pr-link"
             title="Open PR on GitHub"
-            onclick="event.stopPropagation()"
+            {{on "click" this.stopPropagation}}
           >
             #{{this.prNumber}}
           </a>
