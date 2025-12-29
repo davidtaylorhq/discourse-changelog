@@ -7,7 +7,7 @@ export default class Router extends EmberRouter {
 }
 
 Router.map(function () {
-  this.route('changelog', { path: '/changelog/:end' });
+  this.route('changelog', { path: '/changelog/*end' });
   this.route('changelog-custom', { path: '/changelog/custom' });
   this.route('error', { path: '/*path' });
 });
