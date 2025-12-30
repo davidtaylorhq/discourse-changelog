@@ -12,6 +12,14 @@ export class ChangelogData {
     return this.commitData?.baseTag || "";
   }
 
+  get defaultStartRef() {
+    return this.sortedTags[0]?.value || "";
+  }
+
+  get defaultEndRef() {
+    return "latest";
+  }
+
   get totalCommits() {
     return this.commitData ? Object.keys(this.commitData.commits).length : 0;
   }
@@ -239,8 +247,6 @@ export const COMMIT_TYPES = [
 
 // Extract commit type from subject
 export function getCommitType(subject) {
-  // Check for explicit type prefix
-
   for (const type of COMMIT_TYPES) {
     if (type.prefix && subject.startsWith(`${type.prefix}:`)) {
       return type.key;
@@ -256,4 +262,90 @@ export function getCommitType(subject) {
   }
 
   return "OTHER";
+}
+
+// Sort commits by date
+export function sortCommitsByDate(commits, direction = "desc") {
+  return [...commits].sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return direction === "desc" ? dateB - dateA : dateA - dateB;
+  });
+}
+
+// Count commits by type
+export function countCommitsByType(commits) {
+  const counts = {};
+  COMMIT_TYPES.forEach((type) => (counts[type.key] = 0));
+
+  commits.forEach((commit) => {
+    const type = getCommitType(commit.subject);
+    if (type && counts[type] !== undefined) {
+      counts[type]++;
+    } else {
+      counts["OTHER"]++;
+    }
+  });
+
+  return counts;
+}
+
+// Filter commits by type and/or search term
+export function filterCommits(commits, { type, searchTerm } = {}) {
+  let filtered = commits;
+
+  if (type && type !== "all") {
+    filtered = filtered.filter((commit) => {
+      const commitType = getCommitType(commit.subject) || "OTHER";
+      return commitType === type;
+    });
+  }
+
+  if (searchTerm?.trim()) {
+    const term = searchTerm.toLowerCase();
+    filtered = filtered.filter((commit) =>
+      commit.subject.toLowerCase().includes(term)
+    );
+  }
+
+  return filtered;
+}
+
+// Filter features that fall within a commit range
+export function filterFeaturesByCommits(features, commits, resolveRef) {
+  if (!commits.length || !features.length) {
+    return [];
+  }
+
+  const commitHashes = new Set(commits.map((c) => c.hash));
+
+  // Get version range from commits (assumes commits are not yet sorted)
+  const sorted = sortCommitsByDate(commits, "desc");
+  const newestVersion = parseVersion(
+    sorted[0].version?.replace(/\s*\+\d+$/, "")
+  );
+  const oldestVersion = parseVersion(
+    sorted.at(-1).version?.replace(/\s*\+\d+$/, "")
+  );
+
+  return features.filter((feature) => {
+    const discourseVersion = feature.discourse_version;
+    if (!discourseVersion) {
+      return false;
+    }
+
+    if (discourseVersion.match(/\d+\.\d+\.\d+/)) {
+      const parsedVersion = parseVersion(discourseVersion);
+      if (!parsedVersion || !newestVersion || !oldestVersion) {
+        return false;
+      }
+      return (
+        semver.gt(parsedVersion, oldestVersion) &&
+        semver.lte(parsedVersion, newestVersion)
+      );
+    } else {
+      const fullCommitHash = resolveRef(discourseVersion);
+      return commitHashes.has(fullCommitHash);
+    }
+  });
 }
