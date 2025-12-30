@@ -19,11 +19,12 @@ import FeatureCard from "./feature-card";
 
 const eq = helper(([a, b]) => a === b);
 
-const DEFAULT_START_REF = "v2025.11.0";
+const data = new ChangelogData();
+
+const DEFAULT_START_REF = data.sortedTags[0].value;
 const DEFAULT_END_REF = "latest";
 
 export default class CommitViewer extends Component {
-  @tracked data = new ChangelogData();
   @tracked activeTab = "all";
   @tracked filterText = "";
   @tracked startAdvancedMode = false;
@@ -35,12 +36,12 @@ export default class CommitViewer extends Component {
       return this.startHash === value;
     }
     // When start is not specified, compute the previous version from end
-    if (!this.data.commitData) {
+    if (!data.commitData) {
       return false;
     }
     const endRef = this.endHash.trim() || DEFAULT_END_REF;
     const computedStart =
-      this.data.getPreviousVersion(endRef) || DEFAULT_START_REF;
+      data.getPreviousVersion(endRef) || DEFAULT_START_REF;
     return value === computedStart;
   };
 
@@ -99,7 +100,7 @@ export default class CommitViewer extends Component {
 
   @cached
   get allCommits() {
-    if (!this.data.commitData) {
+    if (!data.commitData) {
       return [];
     }
 
@@ -108,11 +109,11 @@ export default class CommitViewer extends Component {
     // If start is not specified, find the previous version from end
     let startRef = this.startHash.trim();
     if (!startRef) {
-      startRef = this.data.getPreviousVersion(endRef) || DEFAULT_START_REF;
+      startRef = data.getPreviousVersion(endRef) || DEFAULT_START_REF;
     }
 
     // Get commits between the two refs using graph traversal
-    return this.data.getCommitsBetween(startRef, endRef);
+    return data.getCommitsBetween(startRef, endRef);
   }
 
   @cached
@@ -141,7 +142,7 @@ export default class CommitViewer extends Component {
 
   @cached
   get error() {
-    if (!this.data.commitData) {
+    if (!data.commitData) {
       return null;
     }
 
@@ -150,7 +151,7 @@ export default class CommitViewer extends Component {
       const endRef = this.endHash.trim() || DEFAULT_END_REF;
       let startRef = this.startHash.trim();
       if (!startRef) {
-        startRef = this.data.getPreviousVersion(endRef) || DEFAULT_START_REF;
+        startRef = data.getPreviousVersion(endRef) || DEFAULT_START_REF;
       }
       return `No commits found`;
     }
@@ -160,7 +161,7 @@ export default class CommitViewer extends Component {
 
   @cached
   get matchingFeatures() {
-    if (!this.allCommits.length || !this.data.newFeatures.length) {
+    if (!this.allCommits.length || !data.newFeatures.length) {
       return [];
     }
 
@@ -176,7 +177,7 @@ export default class CommitViewer extends Component {
     );
 
     // Find features that match either by hash or by version
-    return this.data.newFeatures.filter((feature) => {
+    return data.newFeatures.filter((feature) => {
       const discourseVersion = feature.discourse_version;
       if (!discourseVersion) {
         return false;
@@ -189,7 +190,7 @@ export default class CommitViewer extends Component {
           semver.lte(parsedVersion, newestVersion)
         );
       } else {
-        const fullCommitHash = this.data.resolveRef(discourseVersion);
+        const fullCommitHash = data.resolveRef(discourseVersion);
         return commitHashes.has(fullCommitHash);
       }
     });
@@ -256,13 +257,13 @@ export default class CommitViewer extends Component {
   }
 
   get displayStartRef() {
-    if (!this.data.commitData) {
+    if (!data.commitData) {
       return "";
     }
     const endRef = this.endHash.trim() || DEFAULT_END_REF;
     let startRef = this.startHash.trim();
     if (!startRef) {
-      startRef = this.data.getPreviousVersion(endRef) || DEFAULT_START_REF;
+      startRef = data.getPreviousVersion(endRef) || DEFAULT_START_REF;
     }
     return startRef;
   }
@@ -324,7 +325,7 @@ export default class CommitViewer extends Component {
             {{else}}
               <select id="start-ref" {{on "change" this.updateStartRef}}>
                 <optgroup label="Branches">
-                  {{#each this.data.branches as |ref|}}
+                  {{#each data.branches as |ref|}}
                     <option
                       value={{ref.value}}
                       selected={{this.isStartSelected ref.value}}
@@ -334,7 +335,7 @@ export default class CommitViewer extends Component {
                   {{/each}}
                 </optgroup>
                 <optgroup label="Tags">
-                  {{#each this.data.sortedTags as |ref|}}
+                  {{#each data.sortedTags as |ref|}}
                     <option
                       value={{ref.value}}
                       selected={{this.isStartSelected ref.value}}
@@ -373,7 +374,7 @@ export default class CommitViewer extends Component {
             {{else}}
               <select id="end-ref" {{on "change" this.updateEndRef}}>
                 <optgroup label="Branches">
-                  {{#each this.data.branches as |ref|}}
+                  {{#each data.branches as |ref|}}
                     <option
                       value={{ref.value}}
                       selected={{this.isEndSelected ref.value}}
@@ -383,7 +384,7 @@ export default class CommitViewer extends Component {
                   {{/each}}
                 </optgroup>
                 <optgroup label="Tags">
-                  {{#each this.data.sortedTags as |ref|}}
+                  {{#each data.sortedTags as |ref|}}
                     <option
                       value={{ref.value}}
                       selected={{this.isEndSelected ref.value}}
@@ -460,7 +461,7 @@ export default class CommitViewer extends Component {
           </div>
         {{/if}}
 
-        {{#if this.data.isLoading}}
+        {{#if data.isLoading}}
           <div class="loading">Loading commit data...</div>
         {{/if}}
 
