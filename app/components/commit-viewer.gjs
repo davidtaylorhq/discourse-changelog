@@ -40,8 +40,7 @@ export default class CommitViewer extends Component {
       return false;
     }
     const endRef = this.endHash.trim() || DEFAULT_END_REF;
-    const computedStart =
-      data.getPreviousVersion(endRef) || DEFAULT_START_REF;
+    const computedStart = data.getPreviousVersion(endRef) || DEFAULT_START_REF;
     return value === computedStart;
   };
 
