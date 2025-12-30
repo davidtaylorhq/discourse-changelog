@@ -1,8 +1,8 @@
 .security-advisory-card {
   background: linear-gradient(
     135deg,
-    light-dark(#f39c12, #d38b10) 0%,
-    light-dark(#e67e22, #c66a1a) 100%
+    light-dark(#c0392b, #a32d23) 0%,
+    light-dark(#a32d23, #8b251d) 100%
   );
   border-radius: 8px;
   padding: 1.25rem;

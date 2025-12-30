@@ -3,7 +3,7 @@ import CommitsData from "/data/commits.json";
 
 export default class ChangelogRoute extends Route {
   beforeModel(transition) {
-    const end = transition.to.params.end;
+    const end = transition.to.params.end.replace(/\/$/, "");
 
     if (!end) {
       return;
@@ -21,7 +21,7 @@ export default class ChangelogRoute extends Route {
   model(params) {
     return {
       start: null,
-      end: params.end,
+      end: params.end.replace(/\/$/, ""),
     };
   }
 }
