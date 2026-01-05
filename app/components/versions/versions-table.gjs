@@ -6,7 +6,7 @@ import VersionSupport from "/data/version-support.json";
 import semver from "semver";
 import eq from "../../helpers/eq.js";
 import { ChangelogData } from "../../lib/git-utils.js";
-import VersionsTimeline from "./versions-timeline.gjs";
+import VersionsTimeline from "./timeline";
 
 export default class VersionsTable extends Component {
   @tracked data = new ChangelogData();
