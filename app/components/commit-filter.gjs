@@ -1,4 +1,3 @@
-import { helper } from "@ember/component/helper";
 import { concat, fn, get } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { htmlSafe } from "@ember/template";
