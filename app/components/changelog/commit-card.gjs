@@ -8,6 +8,8 @@ import "./commit-card.css";
 import { COMMIT_TYPES, getCommitType } from "../../lib/git-utils.js";
 import highlightTerm from "../../modifiers/highlight-term.js";
 
+// Storing expanded state outside the component, so that it persists
+// across component re-use in the virtual-list
 const expandedCommits = trackedWeakMap(new WeakMap());
 
 export default class CommitCard extends Component {
@@ -90,20 +92,12 @@ export default class CommitCard extends Component {
 
   @action
   toggleDetails(event) {
-    // Don't toggle if clicking on a link
     if (event.target.tagName === "A" || event.target.closest("a")) {
       return;
     }
 
-    // Store expanded state for future re-renders
     const currentState = expandedCommits.get(this.args.commit) || false;
     expandedCommits.set(this.args.commit, !currentState);
-
-    const card = event.currentTarget;
-    const details = card.querySelector(".commit-details");
-    if (details) {
-      details.open = !currentState;
-    }
   }
 
   <template>
