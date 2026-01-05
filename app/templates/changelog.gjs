@@ -4,7 +4,7 @@ import CommitViewer from "../components/changelog/commit-viewer";
 import metaDescription from "../helpers/meta-description";
 
 <template>
-  {{pageTitle (concat "'" @controller.end "' Changelog")}}
+  {{pageTitle (concat @controller.end " Changelog")}}
   {{metaDescription
     (concat
       "Featured changes and detailed commit history for Discourse '"
