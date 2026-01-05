@@ -232,6 +232,10 @@ export default class VersionsTable extends Component {
 
       <div class="version-info">
         <p>
+          This site provides information about Discourse versions, their release
+          dates, support timelines, and changelogs.
+        </p>
+        <p>
           Most Discourse installations track the
           <strong>latest</strong>
           version, which receives continuous updates with new features, bug
@@ -243,10 +247,6 @@ export default class VersionsTable extends Component {
           approximately two months. Every 6 months, an Extended Support Release
           (ESR) is designated, which receives updates for approximately 8
           months.
-        </p>
-        <p>
-          This site provides information about Discourse versions, their release
-          dates, support timelines, and changelogs.
         </p>
       </div>
 
