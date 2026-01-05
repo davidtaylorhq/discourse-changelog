@@ -232,17 +232,21 @@ export default class VersionsTable extends Component {
 
       <div class="version-info">
         <p>
-          Discourse releases new versions every month, which are supported with
-          critical bug fixes and security updates for approximately two months.
-          Every 6 months, one of those releases is designated as an Extended
-          Support Release (ESR) version. This will be supported for
-          approximately 8 months, providing an option for users who prefer less
-          frequent updates.
+          Most Discourse installations track the
+          <strong>latest</strong>
+          version, which receives continuous updates with new features, bug
+          fixes, and security patches.
         </p>
         <p>
-          Below is a timeline and list of Discourse versions, their release
-          dates, end-of-life dates, and support status. Click on a version to
-          view its changelog.
+          Numbered releases are available for those who prefer less frequent
+          changes. Each monthly release receives security updates for
+          approximately two months. Every 6 months, an Extended Support Release
+          (ESR) is designated, which receives updates for approximately 8
+          months.
+        </p>
+        <p>
+          This site provides information about Discourse versions, their release
+          dates, support timelines, and changelogs.
         </p>
       </div>
 
