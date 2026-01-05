@@ -220,7 +220,7 @@ export default class VersionsTable extends Component {
 
       <div class="feedback-banner">
         <span class="feedback-icon">✨</span>
-        <span class="feedback-text">
+        <span>
           This site is new! Let us know what you think
           <a
             href="https://meta.discourse.org/t/392712"

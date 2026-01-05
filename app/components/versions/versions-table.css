@@ -4,38 +4,6 @@
   padding: 0 1rem 2rem;
 }
 
-.feedback-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: var(--color-notice);
-  color: white;
-  padding: 0.875rem 1.25rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.feedback-icon {
-  font-size: 1.25rem;
-}
-
-.feedback-text {
-  font-size: 0.95rem;
-  line-height: 1.4;
-}
-
-.feedback-text a {
-  color: white;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.feedback-text a:hover {
-  text-decoration-thickness: 2px;
-}
-
 .header {
   margin-bottom: 2rem;
   text-align: left;
@@ -257,4 +225,31 @@
   font-size: 0.75rem;
   border-radius: 3px;
   font-weight: normal;
+}
+
+.feedback-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--color-notice);
+  color: white;
+  padding: 0.875rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.feedback-icon {
+  font-size: 1.25rem;
+}
+
+.versions-container .feedback-banner a {
+  color: white;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.versions-container .feedback-banner a:hover {
+  text-decoration-thickness: 2px;
 }
