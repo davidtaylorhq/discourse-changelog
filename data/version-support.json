@@ -1,0 +1,47 @@
+[
+  {
+    "version": "2026.01",
+    "releaseDate": "2026-01",
+    "developmentStartDate": "2025-12-30",
+    "supportEndDate": "2026-09",
+    "isESR": true,
+    "tags": ["latest"],
+    "status": "in-development"
+  },
+  {
+    "version": "2025.12",
+    "releaseDate": "2025-12-30",
+    "developmentStartDate": "2025-11-25",
+    "supportEndDate": "2026-02",
+    "isESR": false,
+    "tags": ["release"],
+    "status": "active"
+  },
+  {
+    "version": "2025.11",
+    "releaseDate": "2025-11-25",
+    "developmentStartDate": "2025-10-28",
+    "supportEndDate": "2026-01",
+    "isESR": false,
+    "tags": [],
+    "status": "active"
+  },
+  {
+    "version": "3.5",
+    "releaseDate": "2025-08-19",
+    "developmentStartDate": "2025-08-19",
+    "supportEndDate": "2026-03",
+    "isESR": true,
+    "tags": ["ESR"],
+    "status": "active"
+  },
+  {
+    "version": "3.4",
+    "releaseDate": "2025-02-04",
+    "developmentStartDate": "2025-01-04",
+    "supportEndDate": "2025-08-19",
+    "isESR": true,
+    "tags": [],
+    "status": "end-of-life"
+  }
+]

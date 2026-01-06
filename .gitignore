@@ -1,7 +1,13 @@
 # compiled output
 /dist/
+/dist-ssr/
 /declarations/
 /tmp/
+
+# generated data files
+/data/commits.json
+/data/new-features.json
+/data/security-advisories.json
 
 # dependencies
 /node_modules/

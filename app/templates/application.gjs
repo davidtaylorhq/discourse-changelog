@@ -1,9 +1,10 @@
-import { pageTitle } from 'ember-page-title';
-
+import { pageTitle } from "ember-page-title";
+import SiteHeader from "../components/site-header.gjs";
 
 <template>
-  {{pageTitle "DiscourseChangelog"}}
-  <h2 id="title">Welcome to Ember</h2>
+  {{pageTitle "Discourse Releases"}}
+
+  <SiteHeader />
 
   {{outlet}}
 </template>

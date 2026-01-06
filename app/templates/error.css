@@ -1,0 +1,70 @@
+.error-container {
+  max-width: 600px;
+  margin: 4rem auto;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.error-content {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.error-title {
+  font-size: 6rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.error-subtitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 1rem 0 0.5rem;
+  color: var(--text-primary);
+}
+
+.error-message {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0 0 2rem;
+  line-height: 1.6;
+}
+
+.error-link {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-active-development);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.error-link:hover {
+  background: oklch(from var(--color-active-development) calc(l * 0.9) c h);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+@media (width <= 768px) {
+  .error-container {
+    margin: 2rem auto;
+  }
+
+  .error-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .error-title {
+    font-size: 4rem;
+  }
+
+  .error-subtitle {
+    font-size: 1.5rem;
+  }
+}

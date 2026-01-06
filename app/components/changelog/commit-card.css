@@ -1,0 +1,202 @@
+.commit-card {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+  border-left: 4px solid var(--color-active-development);
+}
+
+.commit-card.expandable {
+  cursor: pointer;
+}
+
+.commit-card.expandable:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.commit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.commit-message {
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+}
+
+.commit-message .pr-link {
+  color: var(--text-link);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.commit-message .pr-link:hover {
+  text-decoration: underline;
+}
+
+.commit-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.commit-author {
+  color: var(--text-muted);
+}
+
+.commit-meta-label {
+  color: var(--text-muted);
+}
+
+.commit-version {
+  color: var(--text-muted);
+  font-family: "SF Mono", Monaco, Menlo, "Ubuntu Mono", monospace;
+  font-size: 0.75rem;
+}
+
+.commit-date {
+  color: var(--text-muted);
+}
+
+.commit-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.commit-sha {
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-family: "SF Mono", Monaco, Menlo, "Ubuntu Mono", monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.commit-sha:hover {
+  background: oklch(from var(--color-active-development) l c h / 15%);
+  border-color: var(--color-active-development);
+  color: var(--color-active-development);
+}
+
+.commit-separator {
+  color: var(--text-muted);
+}
+
+.commit-pr-link {
+  color: var(--text-link);
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.commit-pr-link:hover {
+  text-decoration: underline;
+  color: var(--text-link-hover);
+}
+
+.commit-meta-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.commit-meta-details {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.commit-time {
+  color: var(--text-muted);
+}
+
+.commit-time::before {
+  content: "·";
+  margin-right: 0.5rem;
+  color: var(--text-muted);
+}
+
+/* Expandable commit body section */
+.commit-details {
+  margin-top: 0.5rem;
+}
+
+.commit-summary {
+  display: none;
+}
+
+.commit-body {
+  color: var(--text-primary);
+}
+
+.commit-full-body {
+  padding: 1rem;
+  background-color: var(--bg-code);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.commit-body-link {
+  color: var(--text-link);
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.commit-body-link:hover {
+  color: var(--text-link-hover);
+}
+
+/* Responsive design */
+@media (width <= 768px) {
+  .commit-card {
+    padding: 0.875rem 1rem;
+  }
+
+  .commit-header {
+    gap: 0.5rem;
+  }
+
+  .commit-tags {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+  }
+
+  .commit-full-body {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+}

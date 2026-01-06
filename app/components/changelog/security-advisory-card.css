@@ -1,0 +1,81 @@
+.security-advisory-card {
+  background: linear-gradient(
+    135deg,
+    light-dark(#c0392b, #a32d23) 0%,
+    light-dark(#a32d23, #8b251d) 100%
+  );
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  color: white;
+  display: flex;
+  gap: 1rem;
+  box-shadow: var(--shadow-md);
+  transition: box-shadow 0.2s ease;
+  text-decoration: none;
+}
+
+.security-advisory-card:hover {
+  box-shadow: 0 4px 12px light-dark(rgb(0 0 0 / 25%), rgb(0 0 0 / 45%));
+}
+
+.advisory-icon {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.advisory-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.advisory-cve {
+  display: inline-block;
+  font-family: "SF Mono", Monaco, Menlo, "Ubuntu Mono", monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: rgb(0 0 0 / 20%);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.advisory-summary {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 95%);
+}
+
+.advisory-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.advisory-date {
+  font-size: 0.8rem;
+  color: rgb(255 255 255 / 75%);
+}
+
+.advisory-link-hint {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgb(255 255 255 / 90%);
+}
+
+/* Responsive design */
+@media (width <= 768px) {
+  .security-advisory-card {
+    padding: 1rem;
+  }
+
+  .advisory-icon {
+    display: none;
+  }
+
+  .advisory-summary {
+    font-size: 0.9rem;
+  }
+}

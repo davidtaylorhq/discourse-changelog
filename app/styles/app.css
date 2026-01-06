@@ -1,1 +1,426 @@
 /* Ember supports plain CSS out of the box. More info: https://cli.emberjs.com/release/advanced-use/stylesheets/ */
+
+:root {
+  /* Status colors */
+  --color-active-development: #3498db;
+  --color-supported: #27ae60;
+  --color-esr: #9b59b6;
+  --color-end-of-life: #95a5a6;
+  --color-today: #e74c3c;
+
+  /* UI colors */
+  --color-notice: #9b59b6;
+  --color-feature: #667eea;
+
+  /* Light mode colors */
+  --bg-page: #f5f5f5;
+  --bg-card: white;
+  --bg-card-hover: white;
+  --bg-subtle: #f8f9fa;
+  --bg-code: #f8f9fa;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --text-muted: #7f8c8d;
+  --text-link: #06c;
+  --text-link-hover: #0052a3;
+  --border-color: #e1e8ed;
+  --border-subtle: #f0f0f0;
+  --shadow-sm: 0 2px 4px rgb(0 0 0 / 10%);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 15%);
+  --shadow-hover: 0 2px 6px rgb(0 0 0 / 12%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-page: #1a1a1a;
+    --bg-card: #2d2d2d;
+    --bg-card-hover: #363636;
+    --bg-subtle: #242424;
+    --bg-code: #242424;
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --text-muted: #888;
+    --text-link: #5dade2;
+    --text-link-hover: #85c1e9;
+    --border-color: #404040;
+    --border-subtle: #333;
+    --shadow-sm: 0 2px 4px rgb(0 0 0 / 30%);
+    --shadow-md: 0 4px 12px rgb(0 0 0 / 40%);
+    --shadow-hover: 0 2px 6px rgb(0 0 0 / 35%);
+  }
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-page);
+}
+
+.commit-viewer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+  position: relative;
+}
+
+.back-to-versions {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  color: var(--color-active-development);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.back-to-versions:hover {
+  background: oklch(from var(--color-active-development) l c h / 10%);
+  color: oklch(from var(--color-active-development) calc(l * 0.85) c h);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.changelog-info {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.changelog-range {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.changelog-range strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.toggle-selector-btn {
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-selector-btn:hover {
+  background: oklch(from var(--bg-subtle) calc(l * 0.95) c h);
+  border-color: oklch(from var(--border-color) calc(l * 0.85) c h);
+  color: var(--text-primary);
+}
+
+.form-section {
+  width: 100%;
+  background: var(--bg-card);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2rem;
+  box-sizing: border-box;
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.input-group label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.advanced-toggle {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--color-active-development);
+  background: var(--bg-card);
+  color: var(--color-active-development);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.advanced-toggle:hover {
+  background: var(--color-active-development);
+  color: white;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.input-group select {
+  cursor: pointer;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  outline: none;
+  border-color: var(--color-active-development);
+}
+
+.input-help {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.form-section .go-button {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--color-active-development);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.form-section .go-button:hover {
+  background: oklch(from var(--color-active-development) calc(l * 0.85) c h);
+}
+
+.fetch-button {
+  background: var(--color-active-development);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.fetch-button:disabled {
+  background: var(--color-end-of-life);
+  cursor: not-allowed;
+}
+
+.fetch-button:hover:not(:disabled) {
+  background: oklch(from var(--color-active-development) calc(l * 0.85) c h);
+}
+
+.error {
+  background: var(--color-today);
+  color: white;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 2rem;
+}
+
+.results-header {
+  margin-bottom: 1.5rem;
+}
+
+.results-header h2 {
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.commits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+.section-header::before,
+.section-header::after {
+  content: "";
+  flex: 1;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.section-header h2 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: 700;
+  padding: 0 1.5rem;
+  white-space: nowrap;
+}
+
+.features-section {
+  margin-bottom: 2rem;
+}
+
+.filter-section {
+  background: var(--bg-card);
+  padding: 1.5rem 2rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2rem;
+}
+
+.filter-section label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.filter-input-wrapper {
+  margin-top: 1rem;
+}
+
+.filter-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.3s;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--color-active-development);
+}
+
+.filter-input::placeholder {
+  color: var(--text-muted);
+}
+
+.commit-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.commit-tab {
+  padding: 0.6rem 1rem;
+  border: 2px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.commit-tab:hover {
+  border-color: oklch(from var(--border-color) calc(l * 0.85) c h);
+  background: var(--bg-subtle);
+}
+
+.commit-tab.active {
+  background: var(--tab-color, var(--color-active-development));
+  color: white;
+  border-color: var(--tab-color, var(--color-active-development));
+}
+
+.commit-tab.active:hover {
+  opacity: 0.9;
+}
+
+.tab-count {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.commit-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  vertical-align: middle;
+}
+
+::highlight(search-match) {
+  background-color: light-dark(#fff59d, #6b5b00);
+  color: light-dark(#000, #fff);
+}
+
+/* Responsive design */
+@media (width <= 768px) {
+  .form-section {
+    padding: 1.5rem;
+  }
+
+  .commit-tabs {
+    gap: 0.4rem;
+  }
+
+  .commit-tab {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .tab-count {
+    font-size: 0.75rem;
+  }
+}

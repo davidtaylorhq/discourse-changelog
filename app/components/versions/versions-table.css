@@ -1,0 +1,255 @@
+.versions-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+}
+
+.header {
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.header p {
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+}
+
+.version-info {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.version-info p {
+  margin: 0 0 1rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.version-info p:last-child {
+  margin-bottom: 0;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.versions-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.version-card {
+  background: var(--bg-card);
+  border-radius: 6px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+  scroll-margin-top: 20px;
+}
+
+.version-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.version-card:target {
+  box-shadow: oklch(from var(--color-active-development) l c h / 30%) 0 4px 12px;
+  transform: scale(1.01);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.version-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.version-link {
+  color: var(--text-link);
+  text-decoration: none;
+}
+
+.version-link:hover {
+  text-decoration: underline;
+}
+
+.version-name {
+  color: var(--text-primary);
+}
+
+.status-badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.card-body {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-label {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.card-value {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.card-value a {
+  color: var(--text-link);
+  text-decoration: none;
+}
+
+.card-value a:hover {
+  text-decoration: underline;
+}
+
+.muted-text {
+  color: var(--text-muted);
+}
+
+.patch-versions {
+  border-top: 1px solid var(--border-subtle);
+  padding: 0.5rem 1rem;
+  background: var(--bg-subtle);
+}
+
+.patch-version-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+}
+
+.patch-version-link {
+  color: var(--text-link);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.patch-version-link:hover {
+  text-decoration: underline;
+}
+
+.version-card.eol-version .card-header {
+  background: oklch(from var(--color-end-of-life) l c h / 15%);
+}
+
+.version-card.eol-version {
+  opacity: 0.8;
+}
+
+.version-card.active-version .card-header {
+  background: oklch(from var(--color-supported) l c h / 20%);
+}
+
+.version-card.in-development-version .card-header {
+  background: oklch(from var(--color-active-development) l c h / 20%);
+}
+
+.version-tag {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  background: var(--color-esr);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.esr-note {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: normal;
+  margin-left: 0.25rem;
+}
+
+.support-status-active {
+  background: var(--color-supported);
+  color: white;
+}
+
+.support-status-end-of-life {
+  background: var(--color-end-of-life);
+  color: white;
+}
+
+.support-status-in-development {
+  background: var(--color-active-development);
+  color: white;
+}
+
+.relative-date {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.date-badge {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  border-radius: 3px;
+  font-weight: normal;
+}
+
+.feedback-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--color-notice);
+  color: white;
+  padding: 0.875rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.feedback-icon {
+  font-size: 1.25rem;
+}
+
+.versions-container .feedback-banner a {
+  color: white;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.versions-container .feedback-banner a:hover {
+  text-decoration-thickness: 2px;
+}

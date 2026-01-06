@@ -2,9 +2,13 @@
 <html lang="en-US">
   <head>
     <meta charset="utf-8">
-    <title>DiscourseChangelog</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline' 'self'; img-src *;">
+    <title>Discourse Releases</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon" href="/logo-small-light.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="/logo-small-dark.png" media="(prefers-color-scheme: dark)">
 
     {{content-for "head"}}
 
@@ -16,13 +20,10 @@
   <body>
     {{content-for "body"}}
 
-    <script src="/@embroider/virtual/vendor.js"></script>
-    <script type="module">
-      import Application from './app/app';
-      import environment from './app/config/environment';
+    <div id="main-outlet"></div>
 
-      Application.create(environment.APP);
-    </script>
+    <script src="/@embroider/virtual/vendor.js" vite-ignore></script>
+    <script type="module" src="/start-app.js"></script>
 
     {{content-for "body-footer"}}
   </body>
