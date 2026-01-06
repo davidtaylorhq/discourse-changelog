@@ -1,21 +1,22 @@
 import Component from "@glimmer/component";
 import { cached, tracked } from "@glimmer/tracking";
-import { on } from "@ember/modifier";
 import { action } from "@ember/object";
 import VerticalCollection from "@html-next/vertical-collection/components/vertical-collection/component";
 import config from "discourse-releases/config/environment";
 import {
+  AmbiguousRefError,
   ChangelogData,
   countCommitsByType,
   filterAdvisoriesByCommits,
   filterCommits,
   filterFeaturesByCommits,
   sortCommitsByDate,
+  UnknownRefError,
 } from "../../lib/git-utils.js";
 import CommitCard from "./commit-card";
 import CommitFilter from "./commit-filter";
 import FeatureCard from "./feature-card";
-import RefSelector from "./ref-selector";
+import RangeSelector from "./range-selector";
 import SecurityAdvisoryCard from "./security-advisory-card";
 
 const data = new ChangelogData();
@@ -23,7 +24,6 @@ const data = new ChangelogData();
 export default class CommitViewer extends Component {
   @tracked activeTab = "all";
   @tracked filterText = "";
-  @tracked showSelectorUI = false;
 
   get startHash() {
     return this.args.start || "";
@@ -31,6 +31,33 @@ export default class CommitViewer extends Component {
 
   get endHash() {
     return this.args.end || "";
+  }
+
+  // Resolves refs and catches AmbiguousRefError
+  @cached
+  get resolvedRefs() {
+    if (!data.commitData) {
+      return { start: null, end: null, error: null };
+    }
+
+    const endRef = this.endHash.trim() || data.defaultEndRef;
+    const startRef =
+      this.startHash.trim() ||
+      data.getPreviousVersion(endRef) ||
+      data.defaultStartRef;
+
+    try {
+      return {
+        start: data.resolveRef(startRef),
+        end: data.resolveRef(endRef),
+        error: null,
+      };
+    } catch (e) {
+      if (e instanceof AmbiguousRefError || e instanceof UnknownRefError) {
+        return { start: null, end: null, error: e.message };
+      }
+      throw e;
+    }
   }
 
   // Computed default for start ref - based on end ref
@@ -44,7 +71,7 @@ export default class CommitViewer extends Component {
 
   @cached
   get allCommits() {
-    if (!data.commitData) {
+    if (!data.commitData || this.resolvedRefs.error) {
       return [];
     }
 
@@ -66,8 +93,15 @@ export default class CommitViewer extends Component {
     return sortCommitsByDate(filtered, "desc");
   }
 
+  get refError() {
+    return this.resolvedRefs.error;
+  }
+
   @cached
   get error() {
+    if (this.refError) {
+      return this.refError;
+    }
     if (!data.commitData) {
       return null;
     }
@@ -76,6 +110,9 @@ export default class CommitViewer extends Component {
 
   @cached
   get matchingFeatures() {
+    if (this.resolvedRefs.error) {
+      return [];
+    }
     return filterFeaturesByCommits(data.newFeatures, this.allCommits, (ref) =>
       data.resolveRef(ref)
     );
@@ -87,8 +124,8 @@ export default class CommitViewer extends Component {
   }
 
   @action
-  toggleSelectorUI() {
-    this.showSelectorUI = !this.showSelectorUI;
+  handleRangeApply(start, end) {
+    this.args.onUpdateRange?.(start, end);
   }
 
   @action
@@ -147,35 +184,15 @@ export default class CommitViewer extends Component {
             →
             <strong>{{this.displayEndRef}}</strong>
           </p>
-          <button
-            type="button"
-            class="toggle-selector-btn"
-            {{on "click" this.toggleSelectorUI}}
-          >
-            {{if this.showSelectorUI "Hide" "Customize"}}
-            Range
-          </button>
+          <RangeSelector
+            @startValue={{this.startHash}}
+            @startDefault={{this.computedStartDefault}}
+            @endValue={{this.endHash}}
+            @endDefault={{this.defaultEndRef}}
+            @onApply={{this.handleRangeApply}}
+          />
         </div>
       </div>
-
-      {{#if this.showSelectorUI}}
-        <div class="form-section">
-          <RefSelector
-            @inputId="start-ref"
-            @label="Start"
-            @value={{this.startHash}}
-            @defaultValue={{this.computedStartDefault}}
-            @onUpdate={{this.args.onUpdateStart}}
-          />
-          <RefSelector
-            @inputId="end-ref"
-            @label="End"
-            @value={{this.endHash}}
-            @defaultValue={{this.defaultEndRef}}
-            @onUpdate={{this.args.onUpdateEnd}}
-          />
-        </div>
-      {{/if}}
 
       {{#if this.matchingFeatures.length}}
         <div class="section">
@@ -203,41 +220,47 @@ export default class CommitViewer extends Component {
         </div>
       {{/if}}
 
-      <div class="section">
-        <div class="section-header">
-          <h2>Detailed Changes</h2>
+      {{#if this.refError}}
+        <div class="error">
+          {{this.refError}}
         </div>
-
-        <CommitFilter
-          @activeTab={{this.activeTab}}
-          @onTabChange={{this.setActiveTab}}
-          @totalCount={{this.allCommits.length}}
-          @typeCounts={{this.commitTypeCounts}}
-          @filterText={{this.filterText}}
-          @onFilterChange={{this.updateFilterText}}
-        />
-
-        {{#if this.error}}
-          <div class="error">
-            {{this.error}}
+      {{else}}
+        <div class="section">
+          <div class="section-header">
+            <h2>Detailed Changes</h2>
           </div>
-        {{/if}}
 
-        {{#if this.commits.length}}
-          <VerticalCollection
-            @items={{this.commits}}
-            @estimateHeight={{120}}
-            @staticHeight={{false}}
-            @tagName="div"
-            @class="commits-list"
-            @containerSelector="body"
-            @bufferSize={{this.bufferSize}}
-            as |commit|
-          >
-            <CommitCard @commit={{commit}} @searchTerm={{this.filterText}} />
-          </VerticalCollection>
-        {{/if}}
-      </div>
+          <CommitFilter
+            @activeTab={{this.activeTab}}
+            @onTabChange={{this.setActiveTab}}
+            @totalCount={{this.allCommits.length}}
+            @typeCounts={{this.commitTypeCounts}}
+            @filterText={{this.filterText}}
+            @onFilterChange={{this.updateFilterText}}
+          />
+
+          {{#if this.error}}
+            <div class="error">
+              {{this.error}}
+            </div>
+          {{/if}}
+
+          {{#if this.commits.length}}
+            <VerticalCollection
+              @items={{this.commits}}
+              @estimateHeight={{120}}
+              @staticHeight={{false}}
+              @tagName="div"
+              @class="commits-list"
+              @containerSelector="body"
+              @bufferSize={{this.bufferSize}}
+              as |commit|
+            >
+              <CommitCard @commit={{commit}} @searchTerm={{this.filterText}} />
+            </VerticalCollection>
+          {{/if}}
+        </div>
+      {{/if}}
     </div>
   </template>
 }

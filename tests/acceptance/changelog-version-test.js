@@ -93,7 +93,7 @@ module("Acceptance | changelog version", function (hooks) {
     assert.dom(tabs[0]).hasClass("active");
 
     // Workaround flakiness. Seems that vertical-collection isn't setting up test waiters properly?
-    await new Promise(resolve => requestAnimationFrame(resolve));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
 
     // Verify we have the same count as before
     const backToAllCount = findAll(".commit-card").length;
@@ -149,8 +149,9 @@ module("Acceptance | changelog version", function (hooks) {
   test("changing end ref in dropdown mode navigates to new version", async function (assert) {
     await click(".toggle-selector-btn");
 
-    // Change end ref to a different version
+    // Change end ref to a different version and click Go
     await fillIn("#end-ref", "v2025.12.0-latest");
+    await click(".form-section .go-button");
 
     // Should navigate to /changelog/v2025.12.0-latest
     assert.true(currentURL().includes("/changelog/v2025.12.0-latest"));
@@ -160,8 +161,9 @@ module("Acceptance | changelog version", function (hooks) {
   test("changing start ref in dropdown mode navigates to custom route", async function (assert) {
     await click(".toggle-selector-btn");
 
-    // Change start ref to a specific version
+    // Change start ref to a specific version and click Go
     await fillIn("#start-ref", "v2025.11.0");
+    await click(".form-section .go-button");
 
     // Should navigate to /changelog/custom with query params
     assert.true(currentURL().startsWith("/changelog/custom?"));
@@ -175,8 +177,9 @@ module("Acceptance | changelog version", function (hooks) {
     // Switch to advanced mode for start
     await click(findAll(".advanced-toggle")[0]);
 
-    // Enter a commit hash
+    // Enter a commit hash and click Go
     await fillIn("#start-ref", "0005565fb3ebf11137ab93a312828863d25f3e2c");
+    await click(".form-section .go-button");
 
     // Should navigate to /changelog/custom with the commit hash
     assert.true(currentURL().startsWith("/changelog/custom?"));

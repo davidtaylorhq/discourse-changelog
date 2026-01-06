@@ -8,12 +8,8 @@ export default class ChangelogCustomController extends Controller {
   queryParams = ["start", "end"];
 
   @action
-  updateStart(value) {
-    this.start = value;
-  }
-
-  @action
-  updateEnd(value) {
-    this.end = value;
+  updateRange(start, end) {
+    this.start = start;
+    this.end = end;
   }
 }

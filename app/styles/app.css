@@ -138,11 +138,13 @@ body {
 }
 
 .form-section {
+  width: 100%;
   background: var(--bg-card);
   padding: 2rem;
   border-radius: 8px;
   box-shadow: var(--shadow-sm);
   margin-bottom: 2rem;
+  box-sizing: border-box;
 }
 
 .input-group {
@@ -189,6 +191,7 @@ body {
   transition: border-color 0.3s;
   background: var(--bg-card);
   color: var(--text-primary);
+  box-sizing: border-box;
 }
 
 .input-group select {
@@ -207,6 +210,25 @@ body {
   color: var(--text-muted);
   font-size: 0.875rem;
   font-style: italic;
+}
+
+.form-section .go-button {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--color-active-development);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.form-section .go-button:hover {
+  background: oklch(from var(--color-active-development) calc(l * 0.85) c h);
 }
 
 .fetch-button {

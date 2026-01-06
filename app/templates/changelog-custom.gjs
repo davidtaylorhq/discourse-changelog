@@ -9,7 +9,6 @@ import metaDescription from "../helpers/meta-description";
   <CommitViewer
     @start={{@controller.start}}
     @end={{@controller.end}}
-    @onUpdateStart={{@controller.updateStart}}
-    @onUpdateEnd={{@controller.updateEnd}}
+    @onUpdateRange={{@controller.updateRange}}
   />
 </template>

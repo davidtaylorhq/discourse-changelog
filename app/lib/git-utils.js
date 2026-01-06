@@ -4,6 +4,32 @@ import NewFeaturesData from "/data/new-features.json";
 import SecurityAdvisoriesData from "/data/security-advisories.json";
 import semver from "semver";
 
+export class AmbiguousRefError extends Error {
+  constructor(ref, matches) {
+    const shortMatches = matches.slice(0, 5).map((h) => h.slice(0, 12));
+    const moreCount = matches.length - 5;
+    const matchList =
+      moreCount > 0
+        ? `${shortMatches.join(", ")} and ${moreCount} more`
+        : shortMatches.join(", ");
+
+    super(
+      `Ambiguous ref '${ref}' matches ${matches.length} commits: ${matchList}. Use more characters to be specific.`
+    );
+    this.name = "AmbiguousRefError";
+    this.ref = ref;
+    this.matches = matches;
+  }
+}
+
+export class UnknownRefError extends Error {
+  constructor(ref) {
+    super(`Unknown ref '${ref}'. No matching tag, branch, or commit found.`);
+    this.name = "UnknownRefError";
+    this.ref = ref;
+  }
+}
+
 export class ChangelogData {
   @tracked commitData = CommitsData;
   @tracked newFeatures = NewFeaturesData;
@@ -139,13 +165,26 @@ export class ChangelogData {
 
     // Check if it's a partial hash
     if (ref.length < 40) {
-      const fullHash = Object.keys(this.commitData.commits).find((h) =>
+      const matches = Object.keys(this.commitData.commits).filter((h) =>
         h.startsWith(ref)
       );
-      return fullHash || ref;
+
+      if (matches.length > 1) {
+        throw new AmbiguousRefError(ref, matches);
+      }
+
+      if (matches.length === 0) {
+        throw new UnknownRefError(ref);
+      }
+
+      return matches[0];
     }
 
-    // Otherwise assume it's a full hash
+    // Full hash - verify it exists
+    if (!this.commitData.commits[ref]) {
+      throw new UnknownRefError(ref);
+    }
+
     return ref;
   }
 

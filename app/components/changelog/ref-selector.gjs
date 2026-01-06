@@ -8,6 +8,7 @@ const data = new ChangelogData();
 
 export default class RefSelector extends Component {
   @tracked advancedMode = false;
+  @tracked inputValue = "";
 
   isSelected = (value) => {
     if (this.currentValue) {
@@ -23,19 +24,22 @@ export default class RefSelector extends Component {
   @action
   toggleAdvancedMode() {
     this.advancedMode = !this.advancedMode;
-    if (!this.advancedMode) {
-      this.args.onUpdate?.(this.args.defaultValue);
+    if (this.advancedMode) {
+      this.inputValue = this.currentValue;
+    } else {
+      this.args.onChange?.(this.args.defaultValue);
     }
   }
 
   @action
   handleInput(event) {
-    this.args.onUpdate?.(event.target.value);
+    this.inputValue = event.target.value;
+    this.args.onChange?.(this.inputValue);
   }
 
   @action
   handleSelect(event) {
-    this.args.onUpdate?.(event.target.value);
+    this.args.onChange?.(event.target.value);
   }
 
   <template>
@@ -55,11 +59,11 @@ export default class RefSelector extends Component {
         <input
           id={{@inputId}}
           type="text"
-          value={{this.currentValue}}
+          value={{this.inputValue}}
           placeholder="Enter commit hash..."
           {{on "input" this.handleInput}}
         />
-        <small class="input-help">Enter a specific commit hash (full or partial)</small>
+        <small class="input-help">Enter a commit hash</small>
       {{else}}
         <select id={{@inputId}} {{on "change" this.handleSelect}}>
           <optgroup label="Branches">

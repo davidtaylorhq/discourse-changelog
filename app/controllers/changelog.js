@@ -14,23 +14,15 @@ export default class ChangelogController extends Controller {
   }
 
   @action
-  updateStart(value) {
-    // If a start value is provided, always go to custom route
-    this.router.transitionTo("changelog-custom", {
-      queryParams: { start: value, end: this.end },
-    });
-  }
-
-  @action
-  updateEnd(value) {
-    if (this.start) {
-      // If we have a start, go to custom route
+  updateRange(start, end) {
+    if (start) {
+      // If a start value is provided, use custom route
       this.router.transitionTo("changelog-custom", {
-        queryParams: { start: this.start, end: value },
+        queryParams: { start, end },
       });
     } else {
       // Otherwise use the standard changelog route
-      this.router.transitionTo("changelog", value);
+      this.router.transitionTo("changelog", end);
     }
   }
 }
