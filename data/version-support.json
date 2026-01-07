@@ -30,7 +30,7 @@
     "version": "3.5",
     "releaseDate": "2025-08-19",
     "developmentStartDate": "2025-08-19",
-    "supportEndDate": "2026-03",
+    "supportEndDate": "2026-01",
     "isESR": true,
     "tags": ["ESR"],
     "status": "active"
