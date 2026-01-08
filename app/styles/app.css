@@ -2,10 +2,10 @@
 
 :root {
   /* Status colors */
-  --color-active-development: #3498db;
+  --color-active-development: #3475db;
   --color-supported: #27ae60;
   --color-esr: #9b59b6;
-  --color-end-of-life: #95a5a6;
+  --color-end-of-life: #5d6d6e;
   --color-today: #e74c3c;
 
   /* UI colors */

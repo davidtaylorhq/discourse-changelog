@@ -162,7 +162,7 @@
 }
 
 .version-card.eol-version .card-header {
-  background: oklch(from var(--color-end-of-life) l c h / 15%);
+  background: oklch(from var(--color-end-of-life) l c h / 20%);
 }
 
 .version-card.eol-version {

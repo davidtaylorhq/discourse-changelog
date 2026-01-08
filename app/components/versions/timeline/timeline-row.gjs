@@ -37,7 +37,7 @@ export default class TimelineRow extends Component {
     <div class="timeline-row">
       <div class="timeline-row-label">
         <span class="timeline-status-dot timeline-status-{{@status}}"></span>
-        <span class="version-label">v{{@version}}</span>
+        <a href="#version-{{@version}}" class="version-label">v{{@version}}</a>
       </div>
       <div class="timeline-row-timeline">
         <a href="#version-{{@version}}" class="timeline-bar-link">

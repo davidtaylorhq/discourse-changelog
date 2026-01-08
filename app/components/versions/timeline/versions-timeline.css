@@ -77,12 +77,12 @@
   position: absolute;
   height: 100%;
   border-radius: 4px;
-  opacity: 0.9;
+  opacity: 1;
   transition: opacity 0.2s;
 }
 
 .timeline-bar-link:hover .timeline-bar {
-  opacity: 1;
+  opacity: 0.75;
 }
 
 .timeline-bar-development {
@@ -169,6 +169,11 @@
 
 .version-label {
   color: var(--text-primary);
+  text-decoration: none;
+}
+
+.version-label:hover {
+  text-decoration: underline;
 }
 
 .timeline-status-dot {
