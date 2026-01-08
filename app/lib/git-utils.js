@@ -256,9 +256,7 @@ export class ChangelogData {
 // Normalize version tags to proper semver format
 // v3.5.0.beta1 -> v3.5.0-beta.1
 export function normalizeVersion(version) {
-  return version
-    .replace(/\.beta(\d+)$/, "-beta.$1")
-    .replaceAll(/(^|\.)0+(\d)/g, "$1$2");
+  return version.replace(/\.beta(\d+)$/, "-beta.$1");
 }
 
 // Parse a version string to a semver object, handling beta notation

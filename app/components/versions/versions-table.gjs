@@ -54,32 +54,14 @@ export default class VersionsTable extends Component {
 
     // Use version-support.json as the source of truth
     VersionSupport.forEach((supportEntry) => {
-      // Extract the display version (with leading zeros preserved)
-      const displayMatch = supportEntry.version.match(/v?(\d+\.\d+)/);
-      const displayMinorKey = displayMatch ? displayMatch[1] : null;
-
-      if (!displayMinorKey) {
-        return;
-      }
-
-      // Normalize version for semver parsing
-      // Add .0 patch version if not present, and remove leading zeros in minor
-      let normalizedVersion = supportEntry.version.replace(/^v/, ""); // Remove v prefix
-      if (
-        !/\.\d+$/.test(normalizedVersion) ||
-        normalizedVersion.split(".").length === 2
-      ) {
-        normalizedVersion += ".0"; // Add .0 patch version
-      }
-      normalizedVersion = normalizedVersion.replace(/\.0(\d)/, ".$1"); // Remove leading zeros
-      const parsed = semver.coerce(normalizedVersion);
+      const parsed = semver.coerce(supportEntry.version);
 
       if (!parsed) {
         return;
       }
 
       const group = {
-        minorVersion: displayMinorKey,
+        minorVersion: supportEntry.version,
         supportInfo: supportEntry,
         versions: [],
         latestSemver: parsed,
