@@ -11,7 +11,6 @@ module("Acceptance | provisional changelog", function (hooks) {
     CommitsData.provisionalVersions || {}
   );
   const firstProvisional = provisionalVersions[0];
-  const provisionalInfo = CommitsData.provisionalVersions?.[firstProvisional];
 
   // Get a released tag for comparison
   const releasedTags = Object.keys(CommitsData.refs.tags).filter((tag) =>
@@ -19,44 +18,44 @@ module("Acceptance | provisional changelog", function (hooks) {
   );
   const firstReleasedTag = releasedTags[0];
 
-    test("provisional changelog displays the provisional notice", async function (assert) {
-      await visit(`/changelog/${firstProvisional}`);
+  test("provisional changelog displays the provisional notice", async function (assert) {
+    await visit(`/changelog/${firstProvisional}`);
 
-      assert.dom(".provisional-notice").exists("shows provisional notice");
-      assert
-        .dom(".provisional-notice")
-        .includesText(
-          firstProvisional,
-          "notice mentions the provisional version"
-        );
-    });
+    assert.dom(".provisional-notice").exists("shows provisional notice");
+    assert
+      .dom(".provisional-notice")
+      .includesText(
+        firstProvisional,
+        "notice mentions the provisional version"
+      );
+  });
 
-    test("provisional changelog displays commits", async function (assert) {
-      await visit(`/changelog/${firstProvisional}`);
+  test("provisional changelog displays commits", async function (assert) {
+    await visit(`/changelog/${firstProvisional}`);
 
-      assert.dom(".commit-viewer").exists("shows commit viewer");
-      assert.dom(".commit-card").exists("shows commits");
-    });
+    assert.dom(".commit-viewer").exists("shows commit viewer");
+    assert.dom(".commit-card").exists("shows commits");
+  });
 
-    test("provisional changelog shows correct version in range display", async function (assert) {
-      await visit(`/changelog/${firstProvisional}`);
+  test("provisional changelog shows correct version in range display", async function (assert) {
+    await visit(`/changelog/${firstProvisional}`);
 
-      assert
-        .dom(".changelog-range")
-        .includesText(
-          firstProvisional,
-          "range display shows provisional version"
-        );
-    });
+    assert
+      .dom(".changelog-range")
+      .includesText(
+        firstProvisional,
+        "range display shows provisional version"
+      );
+  });
 
-    test("released version does not show provisional notice", async function (assert) {
-      await visit(`/changelog/${firstReleasedTag}`);
+  test("released version does not show provisional notice", async function (assert) {
+    await visit(`/changelog/${firstReleasedTag}`);
 
-      assert
-        .dom(".provisional-notice")
-        .doesNotExist("no provisional notice for released versions");
-      assert.dom(".commit-viewer").exists("shows commit viewer");
-    });
+    assert
+      .dom(".provisional-notice")
+      .doesNotExist("no provisional notice for released versions");
+    assert.dom(".commit-viewer").exists("shows commit viewer");
+  });
 
   test("invalid provisional version returns 404", async function (assert) {
     // Use a version that definitely won't exist
