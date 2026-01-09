@@ -85,6 +85,14 @@ export class ChangelogData {
     return tags.map((tag) => ({ value: tag, label: tag }));
   }
 
+  get provisionalVersions() {
+
+    return Object.keys(this.commitData.provisionalVersions).map((version) => ({
+      value: version,
+      label: version,
+    }));
+  }
+
   get sortedRefs() {
     if (!this.commitData) {
       return [];

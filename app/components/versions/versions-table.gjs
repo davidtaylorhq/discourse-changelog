@@ -1,5 +1,6 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
+import { concat } from "@ember/helper";
 import { LinkTo } from "@ember/routing";
 import "./versions-table.css";
 import VersionSupport from "/data/version-support.json";
@@ -252,7 +253,7 @@ export default class VersionsTable extends Component {
                 {{#if (eq group.supportInfo.status "in-development")}}
                   <LinkTo
                     @route="changelog"
-                    @model="latest"
+                    @model={{concat "v" group.minorVersion ".0"}}
                     class="version-link"
                   >v{{group.minorVersion}}</LinkTo>
                 {{else if (eq group.supportInfo.status "upcoming")}}

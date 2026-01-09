@@ -9,11 +9,12 @@ export default class ChangelogRoute extends Route {
       return;
     }
 
-    // Check if it's a valid branch or tag
+    // Check if it's a valid branch, tag, or provisional version
     const isValidBranch = CommitsData.refs.branches[end] !== undefined;
     const isValidTag = CommitsData.refs.tags[end] !== undefined;
+    const isProvisional = CommitsData.provisionalVersions?.[end] !== undefined;
 
-    if (!isValidBranch && !isValidTag) {
+    if (!isValidBranch && !isValidTag && !isProvisional) {
       throw new Error("Not Found");
     }
   }

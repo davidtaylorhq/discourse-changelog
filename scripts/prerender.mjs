@@ -51,7 +51,16 @@ const changelogRoutes = [
   ...Object.keys(commitsData.refs.tags).map((tag) => `/changelog/${tag}`),
 ];
 
-const routesToPrerender = ["/", "/changelog/custom", ...changelogRoutes];
+const provisionalRoutes = Object.keys(
+  commitsData.provisionalVersions || {}
+).map((v) => `/changelog/${v}`);
+
+const routesToPrerender = [
+  "/",
+  "/changelog/custom",
+  ...changelogRoutes,
+  ...provisionalRoutes,
+];
 
 for (let path of routesToPrerender) {
   await preRender(path, `dist${path}/index.html`);
