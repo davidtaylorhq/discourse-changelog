@@ -68,6 +68,13 @@ body {
   position: relative;
 }
 
+.changelog-info .provisional-notice {
+  margin: 0.75rem 0 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
 .back-to-versions {
   display: inline-block;
   margin-bottom: 1.5rem;

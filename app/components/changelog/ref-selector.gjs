@@ -76,6 +76,18 @@ export default class RefSelector extends Component {
               </option>
             {{/each}}
           </optgroup>
+          {{#if data.provisionalVersions.length}}
+            <optgroup label="Provisional">
+              {{#each data.provisionalVersions as |ref|}}
+                <option
+                  value={{ref.value}}
+                  selected={{this.isSelected ref.value}}
+                >
+                  {{ref.label}}
+                </option>
+              {{/each}}
+            </optgroup>
+          {{/if}}
           <optgroup label="Tags">
             {{#each data.sortedTags as |ref|}}
               <option

@@ -29,7 +29,16 @@ export default class CommitViewer extends Component {
     return this.args.start || "";
   }
 
+  get provisionalInfo() {
+    const end = this.args.end || "";
+    return data.commitData?.provisionalVersions?.[end] || null;
+  }
+
   get endHash() {
+    // For provisional versions, use the branch instead of the version number
+    if (this.provisionalInfo?.branch) {
+      return this.provisionalInfo.branch;
+    }
     return this.args.end || "";
   }
 
@@ -166,6 +175,10 @@ export default class CommitViewer extends Component {
   }
 
   get displayEndRef() {
+    if (this.provisionalInfo) {
+      return this.args.end;
+    }
+
     return this.endHash.trim() || data.defaultEndRef;
   }
 
@@ -191,6 +204,12 @@ export default class CommitViewer extends Component {
             @endDefault={{this.defaultEndRef}}
             @onApply={{this.handleRangeApply}}
           />
+          {{#if this.provisionalInfo}}
+            <p class="provisional-notice">
+              ℹ️ Provisional changelog for
+              <strong>{{@end}}</strong>, which has not yet been released
+            </p>
+          {{/if}}
         </div>
       </div>
 
